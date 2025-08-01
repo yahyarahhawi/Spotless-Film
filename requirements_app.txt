@@ -1,0 +1,12 @@
+# Requirements for Dust Removal GUI App
+torch>=2.0.0
+torchvision>=0.15.0
+Pillow>=9.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+tkinterdnd2>=0.3.0
+tqdm>=4.65.0
+pathlib
+
+# Optional for deep learning inpainting (may require Rust compiler)
+# lama-cleaner>=1.0.0
