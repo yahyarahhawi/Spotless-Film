@@ -9,3 +9,5 @@ CLAUDE.md
 *.pth
 *.pt
 *.mlpackage
+dust_remover/dust_remover/UNetDust.mlpackage/
+dust_remover/dust_remover/LaMa.mlpackage/
