@@ -8,3 +8,4 @@ CLAUDE.md
 *.webp
 *.pth
 *.pt
+*.mlpackage
