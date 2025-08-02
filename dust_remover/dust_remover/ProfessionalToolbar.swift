@@ -23,7 +23,14 @@ struct ProfessionalToolbar: View {
         let allCases = ProfessionalContentView.CompareMode.allCases
         let currentIndex = allCases.firstIndex(of: compareMode) ?? 0
         let nextIndex = (currentIndex + 1) % allCases.count
-        compareMode = allCases[nextIndex]
+        let newMode = allCases[nextIndex]
+        
+        // Auto-disable overlay when switching to split view
+        if newMode == .splitSlider {
+            state.hideDetections = true
+        }
+        
+        compareMode = newMode
     }
     
     var body: some View {

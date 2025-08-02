@@ -271,7 +271,18 @@ struct ProfessionalCanvas: View {
     
     private func splitSliderView(geometry: GeometryProxy) -> some View {
         ZStack {
-            // Base layers
+            // Base layer - processed image (shows on the left side)
+            if let processedImage = state.processedImage {
+                Image(nsImage: processedImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height)
+                    .scaleEffect(state.zoomScale, anchor: .center)
+                    .offset(state.dragOffset)
+                    .clipped()
+            }
+            
+            // Original image overlay (clipped to show on the right side)
             if let originalImage = state.selectedImage {
                 ZStack {
                     Image(nsImage: originalImage)
@@ -296,22 +307,11 @@ struct ProfessionalCanvas: View {
                             .opacity(state.overlayOpacity)
                     }
                 }
-            }
-            
-            // Processed overlay (clipped)
-            if let processedImage = state.processedImage {
-                Image(nsImage: processedImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height)
-                    .scaleEffect(state.zoomScale, anchor: .center)
-                    .offset(state.dragOffset)
-                    .clipped()
-                    .mask {
-                        Rectangle()
-                            .frame(width: geometry.size.width * splitPosition)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                .mask {
+                    Rectangle()
+                        .frame(width: geometry.size.width * (1.0 - splitPosition))
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
             }
             
             // Split line
@@ -341,12 +341,12 @@ struct ProfessionalCanvas: View {
             // Labels
             VStack {
                 HStack {
-                    headerLabel("Original", icon: "photo", color: .blue)
+                    headerLabel("Dust-Free", icon: "sparkles.tv.fill", color: .green)
                         .opacity(splitPosition > 0.1 ? 1 : 0)
                     
                     Spacer()
                     
-                    headerLabel("Dust-Free", icon: "sparkles.tv.fill", color: .green)
+                    headerLabel("Original", icon: "photo", color: .blue)
                         .opacity(splitPosition < 0.9 ? 1 : 0)
                 }
                 .padding()

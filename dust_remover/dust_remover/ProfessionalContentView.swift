@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreML
+import Accelerate
 
 struct ProfessionalContentView: View {
     @StateObject private var state = DustRemovalState()
@@ -25,7 +26,7 @@ struct ProfessionalContentView: View {
             switch self {
             case .single: return "photo"
             case .sideBySide: return "rectangle.split.2x1"
-            case .splitSlider: return "slider.horizontal.2.rectangle"
+            case .splitSlider: return "rectangle.split.1x2"
             }
         }
         
@@ -165,7 +166,14 @@ struct ProfessionalContentView: View {
         let allCases = CompareMode.allCases
         let currentIndex = allCases.firstIndex(of: compareMode) ?? 0
         let nextIndex = (currentIndex + 1) % allCases.count
-        compareMode = allCases[nextIndex]
+        let newMode = allCases[nextIndex]
+        
+        // Auto-disable overlay when switching to split view
+        if newMode == .splitSlider {
+            state.hideDetections = true
+        }
+        
+        compareMode = newMode
     }
     
     private func resetProcessing() {
@@ -234,12 +242,11 @@ struct ProfessionalContentView: View {
                 let startTime = CFAbsoluteTimeGetCurrent()
                 
                 // Dilate the mask for better inpainting coverage
-                guard let dilatedMask = dilateMask(dustMask) else {
-                    throw ProcessingError.maskProcessingFailed
-                }
+                let dilatedMask = dilateMask(dustMask) ?? dustMask // fallback to original mask if dilation fails
+                print("🔍 Dilated mask successfully")
                 
-                // Resize for LaMa (exactly 800x800)
-                let lamaSize = CGSize(width: 800, height: 800)
+                // Resize for LaMa (exactly 2048x2048)
+                let lamaSize = CGSize(width: 2048, height: 2048)
                 let resizedForLama = selectedImage.resized(to: lamaSize)
                 let resizedMaskForLama = dilatedMask.resized(to: lamaSize)
                 
@@ -324,69 +331,45 @@ struct ProfessionalContentView: View {
     }
     
     private func dilateMask(_ mask: NSImage) -> NSImage? {
-        guard let cgImage = mask.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+        guard let cgImage = mask.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
+
+        // Create source vImage buffer
+        var format = vImage_CGImageFormat(bitsPerComponent: 8,
+                                          bitsPerPixel: 8,
+                                          colorSpace: nil,
+                                          bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
+                                          version: 0,
+                                          decode: nil,
+                                          renderingIntent: .defaultIntent)
+        var srcBuffer = vImage_Buffer()
+        var error = vImageBuffer_InitWithCGImage(&srcBuffer, &format, nil, cgImage, vImage_Flags(kvImageNoFlags))
+        guard error == kvImageNoError else { return nil }
+
+        // Create destination buffer
+        var dstBuffer = vImage_Buffer()
+        error = vImageBuffer_Init(&dstBuffer, srcBuffer.height, srcBuffer.width, 8, vImage_Flags(kvImageNoFlags))
+        guard error == kvImageNoError else { return nil }
+
+        // 3×3 disc kernel (structuring element)
+        let kernel: [UInt8] = [1,1,1,
+                               1,1,1,
+                               1,1,1]
+
+        kernel.withUnsafeBufferPointer { ptr in
+            vImageDilate_Planar8(&srcBuffer, &dstBuffer, 0, 0, ptr.baseAddress!, 3, 3, vImage_Flags(kvImageEdgeExtend))
+        }
+
+        // Create CGImage from dstBuffer
+        guard let outCG = vImageCreateCGImageFromBuffer(&dstBuffer, &format, nil, nil, vImage_Flags(kvImageNoAllocate), &error)?.takeRetainedValue(),
+              error == kvImageNoError else {
+            free(dstBuffer.data)
             return nil
         }
-        
-        let width = cgImage.width
-        let height = cgImage.height
-        
-        let colorSpace = CGColorSpaceCreateDeviceGray()
-        guard let context = CGContext(data: nil, width: width, height: height,
-                                    bitsPerComponent: 8, bytesPerRow: width,
-                                    space: colorSpace,
-                                    bitmapInfo: CGImageAlphaInfo.none.rawValue) else {
-            return nil
-        }
-        
-        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-        
-        guard let data = context.data else { return nil }
-        let buffer = data.bindMemory(to: UInt8.self, capacity: width * height)
-        
-        var dilatedData = Data(count: width * height)
-        dilatedData.withUnsafeMutableBytes { ptr in
-            let dilatedBuffer = ptr.bindMemory(to: UInt8.self)
-            
-            // Optimized dilation using concurrent dispatch
-            DispatchQueue.concurrentPerform(iterations: height) { y in
-                for x in 0..<width {
-                    let index = y * width + x
-                    var maxValue: UInt8 = 0
-                    
-                    // Optimized neighborhood check
-                    let minY = max(0, y - 1)
-                    let maxY = min(height - 1, y + 1)
-                    let minX = max(0, x - 1)
-                    let maxX = min(width - 1, x + 1)
-                    
-                    for ny in minY...maxY {
-                        for nx in minX...maxX {
-                            let neighborIndex = ny * width + nx
-                            let value = buffer[neighborIndex]
-                            if value > maxValue {
-                                maxValue = value
-                            }
-                        }
-                    }
-                    
-                    dilatedBuffer[index] = maxValue
-                }
-            }
-        }
-        
-        guard let dataProvider = CGDataProvider(data: dilatedData as CFData),
-              let dilatedCGImage = CGImage(width: width, height: height,
-                                         bitsPerComponent: 8, bitsPerPixel: 8,
-                                         bytesPerRow: width,
-                                         space: colorSpace,
-                                         bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
-                                         provider: dataProvider, decode: nil,
-                                         shouldInterpolate: false, intent: .defaultIntent) else {
-            return nil
-        }
-        
-        return NSImage(cgImage: dilatedCGImage, size: CGSize(width: width, height: height))
+
+        // Clean up src (dst already handed off / not allocated)
+        free(srcBuffer.data)
+
+        return NSImage(cgImage: outCG, size: mask.size)
     }
     
     private func blendImages(original: NSImage, inpainted: NSImage, mask: NSImage) -> NSImage? {
@@ -718,26 +701,28 @@ struct ProfessionalContentView: View {
                     throw ProcessingError.modelLoadFailed("UNet dust detection model not found in bundle")
                 }
                 
-                let model = try MLModel(contentsOf: dustURL)
+                var cfg = MLModelConfiguration()
+                cfg.computeUnits = .all
+                let model = try MLModel(contentsOf: dustURL, configuration: cfg)
                 await MainActor.run {
                     state.unetModel = model
                 }
                 
                 // Load LaMa model
                 var lamaModelURL: URL?
-                lamaModelURL = Bundle.main.url(forResource: "LaMa", withExtension: "mlmodelc")
+                lamaModelURL = Bundle.main.url(forResource: "LaMa_2048", withExtension: "mlmodelc")
                 if lamaModelURL == nil {
-                    lamaModelURL = Bundle.main.url(forResource: "LaMa", withExtension: "mlpackage")
+                    lamaModelURL = Bundle.main.url(forResource: "LaMa_2048", withExtension: "mlpackage")
                 }
                 if lamaModelURL == nil {
-                    lamaModelURL = Bundle.main.url(forResource: "LaMa", withExtension: nil)
+                    lamaModelURL = Bundle.main.url(forResource: "LaMa_2048", withExtension: nil)
                 }
                 
                 guard let lamaURL = lamaModelURL else {
                     throw ProcessingError.modelLoadFailed("LaMa inpainting model not found in bundle")
                 }
                 
-                let lamaModel = try MLModel(contentsOf: lamaURL)
+                let lamaModel = try MLModel(contentsOf: lamaURL, configuration: cfg)
                 await MainActor.run {
                     state.lamaModel = lamaModel
                 }

@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 import CoreML
+import Accelerate
 
 class ImageProcessingService {
     
@@ -32,21 +33,44 @@ class ImageProcessingService {
     // MARK: - Dust Removal
     
     static func removeDust(from image: NSImage, using dustMask: NSImage, with lamaModel: MLModel) async throws -> NSImage {
-        // Dilate the mask for better inpainting coverage
-        guard let dilatedMask = dilateMask(dustMask) else {
-            throw ProcessingError.maskProcessingFailed
+        print("🔍 Starting dust removal process...")
+        print("📏 Input image size: \(image.size)")
+        print("📏 Input mask size: \(dustMask.size)")
+        
+        // Validate inputs
+        guard image.size.width > 0 && image.size.height > 0 else {
+            print("❌ Invalid image dimensions")
+            throw ProcessingError.pixelBufferCreationFailed
         }
+        
+        guard dustMask.size.width > 0 && dustMask.size.height > 0 else {
+            print("❌ Invalid mask dimensions")
+            throw ProcessingError.pixelBufferCreationFailed
+        }
+        
+        // Dilate the mask for better inpainting coverage
+        let dilatedMask = dilateMask(dustMask) ?? dustMask // fallback to original mask if dilation fails
         
         // Resize for LaMa (exactly 800x800)
         let lamaSize = CGSize(width: 800, height: 800)
         let resizedForLama = image.resized(to: lamaSize)
         let resizedMaskForLama = dilatedMask.resized(to: lamaSize)
         
-        guard let rgbPixelBuffer = resizedForLama.toCVPixelBufferRGB(),
-              let maskPixelBuffer = resizedMaskForLama.toCVPixelBuffer() else {
+        print("🔍 Creating RGB pixel buffer for image...")
+        guard let rgbPixelBuffer = resizedForLama.toCVPixelBufferRGB() else {
+            print("❌ Failed to create RGB pixel buffer for image")
             throw ProcessingError.pixelBufferCreationFailed
         }
+        print("✅ RGB pixel buffer created successfully")
         
+        print("🔍 Creating grayscale pixel buffer for mask...")
+        guard let maskPixelBuffer = resizedMaskForLama.toCVPixelBuffer() else {
+            print("❌ Failed to create grayscale pixel buffer for mask")
+            throw ProcessingError.pixelBufferCreationFailed
+        }
+        print("✅ Grayscale pixel buffer created successfully")
+        
+        print("🔍 Creating LaMa input...")
         let lamaInput = LaMaInput(image: rgbPixelBuffer, mask: maskPixelBuffer)
         let lama = LaMa(model: lamaModel)
         
@@ -99,66 +123,31 @@ class ImageProcessingService {
     }
     
     static func dilateMask(_ mask: NSImage) -> NSImage? {
-        guard let cgImage = mask.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            return nil
-        }
-        
-        let width = cgImage.width
-        let height = cgImage.height
-        
-        guard let colorSpace = cgImage.colorSpace,
-              let context = CGContext(data: nil, width: width, height: height,
-                                    bitsPerComponent: 8, bytesPerRow: width,
-                                    space: colorSpace,
-                                    bitmapInfo: CGImageAlphaInfo.none.rawValue) else {
-            return nil
-        }
-        
-        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-        
-        guard let data = context.data else { return nil }
-        let buffer = data.bindMemory(to: UInt8.self, capacity: width * height)
-        
-        // Simple dilation: expand white pixels by 1 pixel in all directions
-        var dilatedData = Data(count: width * height)
-        dilatedData.withUnsafeMutableBytes { ptr in
-            let dilatedBuffer = ptr.bindMemory(to: UInt8.self)
-            
-            for y in 0..<height {
-                for x in 0..<width {
-                    let index = y * width + x
-                    var maxValue: UInt8 = 0
-                    
-                    // Check 3x3 neighborhood
-                    for dy in -1...1 {
-                        for dx in -1...1 {
-                            let nx = x + dx
-                            let ny = y + dy
-                            
-                            if nx >= 0 && nx < width && ny >= 0 && ny < height {
-                                let neighborIndex = ny * width + nx
-                                maxValue = max(maxValue, buffer[neighborIndex])
-                            }
-                        }
-                    }
-                    
-                    dilatedBuffer[index] = maxValue
-                }
+        guard let srcCG = mask.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
+
+        let width = srcCG.width
+        let height = srcCG.height
+
+        // Create planar 8-bit buffer from CGImage using CoreGraphics (device gray)
+        let bytesPerRow = width
+        guard let ctx = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue) else { return nil }
+        ctx.draw(srcCG, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let dataPtr = ctx.data else { return nil }
+
+        var srcBuffer = vImage_Buffer(data: dataPtr, height: vImagePixelCount(height), width: vImagePixelCount(width), rowBytes: bytesPerRow)
+        var dstData = Data(count: height * width)
+        dstData.withUnsafeMutableBytes { dstRaw in
+            var dstBuffer = vImage_Buffer(data: dstRaw.baseAddress, height: vImagePixelCount(height), width: vImagePixelCount(width), rowBytes: bytesPerRow)
+            let kernel: [UInt8] = [1,1,1,1,1,1,1,1,1]
+            kernel.withUnsafeBufferPointer { ptr in
+                vImageDilate_Planar8(&srcBuffer, &dstBuffer, 0, 0, ptr.baseAddress!, 3, 3, vImage_Flags(kvImageEdgeExtend))
             }
         }
-        
-        guard let dataProvider = CGDataProvider(data: dilatedData as CFData),
-              let dilatedCGImage = CGImage(width: width, height: height,
-                                         bitsPerComponent: 8, bitsPerPixel: 8,
-                                         bytesPerRow: width,
-                                         space: colorSpace,
-                                         bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
-                                         provider: dataProvider, decode: nil,
-                                         shouldInterpolate: false, intent: .defaultIntent) else {
-            return nil
-        }
-        
-        return NSImage(cgImage: dilatedCGImage, size: CGSize(width: width, height: height))
+
+        guard let provider = CGDataProvider(data: dstData as CFData),
+              let outCG = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue), provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else { return nil }
+
+        return NSImage(cgImage: outCG, size: mask.size)
     }
 }
 
