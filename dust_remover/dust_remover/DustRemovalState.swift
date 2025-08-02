@@ -34,6 +34,9 @@ class DustRemovalState: ObservableObject {
     @Published var dragOffset: CGSize = .zero
     @Published var eraserToolActive = false
     @Published var spaceKeyPressed = false
+    @Published var overlayOpacity: Double = 0.6
+    @Published var brushSize: Int = 15
+    @Published var isErasing = false
     
     // MARK: - Error Handling
     @Published var errorMessage: String?
@@ -87,5 +90,33 @@ class DustRemovalState: ObservableObject {
     func showError(_ message: String) {
         errorMessage = message
         showingError = true
+    }
+    
+    func createCircularCursor(size: Int) -> NSCursor {
+        let diameter = max(16, size * 2)
+        let cursorSize = diameter
+        let image = NSImage(size: NSSize(width: cursorSize, height: cursorSize))
+        
+        image.lockFocus()
+        NSColor.clear.setFill()
+        NSRect(x: 0, y: 0, width: cursorSize, height: cursorSize).fill()
+        
+        // Draw circle outline
+        let circleRect = NSRect(x: 2, y: 2, width: cursorSize - 4, height: cursorSize - 4)
+        let path = NSBezierPath(ovalIn: circleRect)
+        path.lineWidth = 1.0
+        NSColor.black.setStroke()
+        path.stroke()
+        
+        // Draw inner white circle for contrast
+        let innerPath = NSBezierPath(ovalIn: circleRect.insetBy(dx: 1, dy: 1))
+        innerPath.lineWidth = 1.0
+        NSColor.white.setStroke()
+        innerPath.stroke()
+        
+        image.unlockFocus()
+        
+        let hotSpot = NSPoint(x: cursorSize / 2, y: cursorSize / 2)
+        return NSCursor(image: image, hotSpot: hotSpot)
     }
 }

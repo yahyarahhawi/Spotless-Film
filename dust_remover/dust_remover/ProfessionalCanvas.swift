@@ -15,6 +15,8 @@ struct ProfessionalCanvas: View {
     let onEraserClick: (CGPoint, CGSize) -> Void
     
     @State private var dragGesture: CGSize = .zero
+    @State private var panStartOffset: CGSize? = nil
+    private let panDamping: CGFloat = 1
     @State private var isShowingNavigator = false
     
     var body: some View {
@@ -127,7 +129,7 @@ struct ProfessionalCanvas: View {
                             .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height)
                             .blendMode(.multiply)
                             .colorMultiply(.red)
-                            .opacity(0.6)
+                            .opacity(state.overlayOpacity)
                     }
                 }
                 .scaleEffect(state.zoomScale, anchor: state.zoomAnchor)
@@ -135,19 +137,27 @@ struct ProfessionalCanvas: View {
                 .clipped()
                 .coordinateSpace(name: "canvas")
                 .gesture(getCombinedGestures())
-                .onTapGesture(coordinateSpace: .named("canvas")) { location in
-                    if state.eraserToolActive && !state.spaceKeyPressed {
-                        onEraserClick(location, geometry.size)
-                    }
-                }
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0, coordinateSpace: .named("canvas"))
+                        .onChanged { value in
+                            if state.eraserToolActive && !state.spaceKeyPressed {
+                                onEraserClick(value.location, geometry.size)
+                            }
+                        }
+                        .onEnded { value in
+                            if state.eraserToolActive && !state.spaceKeyPressed {
+                                onEraserClick(value.location, geometry.size)
+                            }
+                        }
+                )
                 .onHover { hovering in
                     if hovering {
-                        if state.eraserToolActive && state.spaceKeyPressed {
-                            NSCursor.openHand.set() // Pan cursor when space is held
+                        if state.spaceKeyPressed {
+                            NSCursor.openHand.set()
                         } else if state.eraserToolActive {
-                            NSCursor.crosshair.set() // Eraser cursor
+                            state.createCircularCursor(size: state.brushSize).set()
                         } else {
-                            NSCursor.arrow.set() // Normal cursor
+                            NSCursor.arrow.set()
                         }
                     } else {
                         NSCursor.arrow.set()
@@ -190,21 +200,31 @@ struct ProfessionalCanvas: View {
                         }
                     }
                     .coordinateSpace(name: "originalCanvas")
-                    .onTapGesture(coordinateSpace: .named("originalCanvas")) { location in
-                        if state.eraserToolActive && !state.spaceKeyPressed {
-                            // Adjust location for side-by-side layout
-                            let adjustedSize = CGSize(width: geometry.size.width / 2 - 1, height: geometry.size.height - 40)
-                            onEraserClick(location, adjustedSize)
-                        }
-                    }
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 0, coordinateSpace: .named("originalCanvas"))
+                            .onChanged { value in
+                                if state.eraserToolActive && !state.spaceKeyPressed {
+                                    // Adjust location for side-by-side layout
+                                    let adjustedSize = CGSize(width: geometry.size.width / 2 - 1, height: geometry.size.height - 40)
+                                    onEraserClick(value.location, adjustedSize)
+                                }
+                            }
+                            .onEnded { value in
+                                if state.eraserToolActive && !state.spaceKeyPressed {
+                                    // Adjust location for side-by-side layout
+                                    let adjustedSize = CGSize(width: geometry.size.width / 2 - 1, height: geometry.size.height - 40)
+                                    onEraserClick(value.location, adjustedSize)
+                                }
+                            }
+                    )
                     .onHover { hovering in
                         if hovering {
-                            if state.eraserToolActive && state.spaceKeyPressed {
-                                NSCursor.openHand.set() // Pan cursor when space is held
+                            if state.spaceKeyPressed {
+                                NSCursor.openHand.set()
                             } else if state.eraserToolActive {
-                                NSCursor.crosshair.set() // Eraser cursor
+                                state.createCircularCursor(size: state.brushSize).set()
                             } else {
-                                NSCursor.arrow.set() // Normal cursor
+                                NSCursor.arrow.set()
                             }
                         } else {
                             NSCursor.arrow.set()
@@ -273,7 +293,7 @@ struct ProfessionalCanvas: View {
                             .clipped()
                             .blendMode(.multiply)
                             .colorMultiply(.red)
-                            .opacity(0.6)
+                            .opacity(state.overlayOpacity)
                     }
                 }
             }
@@ -382,26 +402,28 @@ struct ProfessionalCanvas: View {
             // Only allow pan when space is pressed in eraser mode
             DragGesture()
                 .onChanged { value in
-                    if state.spaceKeyPressed && state.zoomScale > 1.0 {
-                        let newOffset = CGSize(
-                            width: dragGesture.width + value.translation.width,
-                            height: dragGesture.height + value.translation.height
-                        )
-                        state.dragOffset = newOffset
-                    }
+                    if state.spaceKeyPressed {
+                         if panStartOffset == nil { panStartOffset = state.dragOffset }
+                         let newOffset = CGSize(
+                              width: (panStartOffset?.width ?? 0) + value.translation.width * panDamping,
+                              height: (panStartOffset?.height ?? 0) + value.translation.height * panDamping
+                          )
+                          state.dragOffset = newOffset
+                     }
                 }
                 .onEnded { value in
-                    if state.spaceKeyPressed && state.zoomScale > 1.0 {
-                        let finalOffset = CGSize(
-                            width: dragGesture.width + value.translation.width,
-                            height: dragGesture.height + value.translation.height
-                        )
-                        dragGesture = finalOffset
-                        state.dragOffset = finalOffset
-                    } else if !state.spaceKeyPressed {
-                        dragGesture = .zero
-                        state.dragOffset = .zero
-                    }
+                    if state.spaceKeyPressed {
+                         let finalOffset = CGSize(
+                              width: (panStartOffset?.width ?? 0) + value.translation.width * panDamping,
+                              height: (panStartOffset?.height ?? 0) + value.translation.height * panDamping
+                          )
+                          dragGesture = finalOffset
+                          state.dragOffset = finalOffset
+                       } else {
+                          dragGesture = .zero
+                          state.dragOffset = .zero
+                       }
+                       panStartOffset = nil
                 }
         )
         .simultaneously(with:
@@ -468,26 +490,33 @@ struct ProfessionalCanvas: View {
                 // Drag gesture for panning
                 DragGesture()
                     .onChanged { value in
-                        if state.zoomScale > 1.0 {
-                            let newOffset = CGSize(
-                                width: dragGesture.width + value.translation.width,
-                                height: dragGesture.height + value.translation.height
-                            )
-                            state.dragOffset = newOffset
-                        }
+                        if (state.spaceKeyPressed || state.zoomScale > 1.0) {
+                             if panStartOffset == nil { panStartOffset = state.dragOffset }
+                             let adjusted = CGSize(width: value.translation.width * panDamping,
+                                                   height: value.translation.height * panDamping)
+                             let finalOffset = CGSize(
+                                 width: (panStartOffset?.width ?? 0) + adjusted.width,
+                                 height: (panStartOffset?.height ?? 0) + adjusted.height)
+                             state.dragOffset = finalOffset
+                         } else {
+                             dragGesture = .zero
+                             state.dragOffset = .zero
+                         }
                     }
                     .onEnded { value in
-                        if state.zoomScale > 1.0 {
+                        if (state.spaceKeyPressed || state.zoomScale > 1.0) {
+                            let adjusted = CGSize(width: value.translation.width * panDamping,
+                                                  height: value.translation.height * panDamping)
                             let finalOffset = CGSize(
-                                width: dragGesture.width + value.translation.width,
-                                height: dragGesture.height + value.translation.height
-                            )
+                                width: (panStartOffset?.width ?? 0) + adjusted.width,
+                                height: (panStartOffset?.height ?? 0) + adjusted.height)
                             dragGesture = finalOffset
                             state.dragOffset = finalOffset
                         } else {
                             dragGesture = .zero
                             state.dragOffset = .zero
                         }
+                        panStartOffset = nil
                     }
             )
         )

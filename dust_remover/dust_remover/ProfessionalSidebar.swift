@@ -71,32 +71,44 @@ struct ProfessionalSidebar: View {
                     // Detection Section
                     DisclosureGroup("Detection", isExpanded: .constant(true)) {
                         VStack(spacing: 16) {
-                            // Detect Button
-                            Button(action: onDetectDust) {
-                                HStack {
-                                    if state.isDetecting {
-                                        ProgressView()
-                                            .scaleEffect(0.8)
-                                    } else {
-                                        Image(systemName: "magnifyingglass")
+                            // Detect Button + Eraser Button
+                            HStack(spacing: 8) {
+                                // Detect Dust Button (takes ~75% of space)
+                                Button(action: onDetectDust) {
+                                    HStack {
+                                        if state.isDetecting {
+                                            ProgressView()
+                                                .scaleEffect(0.8)
+                                        } else {
+                                            Image(systemName: "magnifyingglass")
+                                        }
+                                        Text(state.isDetecting ? "Detecting..." : "Detect Dust")
                                     }
-                                    Text(state.isDetecting ? "Detecting..." : "Detect Dust")
+                                    .frame(maxWidth: .infinity)
                                 }
-                                .frame(maxWidth: .infinity)
+                                .buttonStyle(.bordered)
+                                .controlSize(.large)
+                                .disabled(!state.canDetectDust)
+                                
+                                // Eraser Button (appears only when dust is detected, takes ~25% of space)
+                                if state.dustMask != nil {
+                                    Button(action: { state.eraserToolActive.toggle() }) {
+                                        Image(systemName: "eraser.fill")
+                                            .foregroundStyle(state.eraserToolActive ? .orange : .primary)
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .controlSize(.large)
+                                    .background(state.eraserToolActive ? .orange.opacity(0.2) : .clear, in: RoundedRectangle(cornerRadius: 6))
+                                    .help("Click and erase dust with circular brush")
+                                    .frame(width: 44) // Fixed width for consistent sizing
+                                }
                             }
-                            .buttonStyle(.bordered)
-                            .controlSize(.large)
-                            .disabled(!state.canDetectDust)
                             
                             // Threshold Controls (when available)
                             if state.rawPredictionMask != nil {
                                 thresholdSection
                             }
                             
-                            // Mask Overlay Controls (when mask exists)
-                            if state.dustMask != nil {
-                                maskOverlaySection
-                            }
                         }
                         .padding(.vertical, 16)
                     }
@@ -255,42 +267,6 @@ struct ProfessionalSidebar: View {
         .background(.quaternary.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
     }
     
-    private var maskOverlaySection: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Label("Overlay", systemImage: "eye")
-                    .font(.subheadline.weight(.medium))
-                Spacer()
-                
-                Button(action: { state.hideDetections.toggle() }) {
-                    Image(systemName: state.hideDetections ? "eye.slash" : "eye")
-                        .foregroundStyle(state.hideDetections ? Color.secondary : Color.orange)
-                }
-                .buttonStyle(.borderless)
-                .help("Toggle Mask Overlay (M)")
-            }
-            
-            if !state.hideDetections {
-                VStack(spacing: 8) {
-                    HStack {
-                        Text("Opacity")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text("60%")
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Slider(value: .constant(0.6), in: 0...1)
-                        .tint(.red.opacity(0.7))
-                        .disabled(true) // TODO: Implement overlay opacity control
-                }
-            }
-        }
-        .padding(12)
-        .background(.quaternary.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
-    }
 }
 
 // MARK: - Custom Disclosure Style

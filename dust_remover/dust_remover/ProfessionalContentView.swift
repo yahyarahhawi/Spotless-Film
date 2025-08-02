@@ -15,6 +15,9 @@ struct ProfessionalContentView: View {
     @State private var compareMode: CompareMode = .single
     @State private var splitPosition: CGFloat = 0.5
     
+    // Local monitor handle
+    @State private var keyMonitor: Any?
+    
     enum CompareMode: CaseIterable {
         case single, sideBySide, splitSlider
         
@@ -57,7 +60,8 @@ struct ProfessionalContentView: View {
                     onImportImage: { showingImagePicker = true },
                     onDetectDust: detectDust,
                     onRemoveDust: removeDust,
-                    onExportImage: saveProcessedImage
+                    onExportImage: saveProcessedImage,
+                    onThresholdChanged: updateDustMaskWithThreshold
                 )
                 .zIndex(1000) // Ensure toolbar stays on top
                 .allowsHitTesting(true) // Ensure toolbar can receive touches
@@ -98,6 +102,28 @@ struct ProfessionalContentView: View {
         }
         .onAppear {
             loadModels()
+            // Add key monitor for Space bar to toggle pan mode universally
+            keyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { event in
+                if event.keyCode == 49 { // Space bar keyCode
+                    if event.type == .keyDown {
+                        DispatchQueue.main.async {
+                            state.spaceKeyPressed = true
+                        }
+                    } else if event.type == .keyUp {
+                        DispatchQueue.main.async {
+                            state.spaceKeyPressed = false
+                        }
+                    }
+                    return nil // swallow space to prevent system beep
+                }
+                return event
+            }
+        }
+        .onDisappear {
+            if let monitor = keyMonitor {
+                NSEvent.removeMonitor(monitor)
+                keyMonitor = nil
+            }
         }
         .alert("Error", isPresented: $state.showingError) {
             Button("OK") { }
@@ -118,16 +144,12 @@ struct ProfessionalContentView: View {
             return .handled
         }
         .onKeyPress(.init(" ")) { // Space key
-            // Space key for pan mode when eraser is active
-            if state.eraserToolActive {
-                state.spaceKeyPressed = true
-                return .handled
-            }
-            return .ignored
+            state.spaceKeyPressed = true
+            return .handled
         }
         .onKeyPress(phases: .up) { keyPress in
             // Handle key release
-            if keyPress.characters == " " && state.eraserToolActive {
+            if keyPress.characters == " " {
                 state.spaceKeyPressed = false
                 return .handled
             }
@@ -483,16 +505,14 @@ struct ProfessionalContentView: View {
                 return
             }
             
-            // Use flood fill to remove connected dust particles
-            if let updatedMask = floodFillRemove(mask: dustMask, at: maskPoint) {
-                print("🔄 Updating state with new mask...")
+            // Compute scale to convert screen radius to mask pixel radius
+            let scaleFactor = CGFloat(maskPixelWidth) / displayedImageRect.width
+            let pixelRadius = max(1, Int(CGFloat(state.brushSize) * scaleFactor))
+
+            if let updatedMask = circularBrushErase(mask: dustMask, at: maskPoint, pixelRadius: pixelRadius) {
                 DispatchQueue.main.async {
                     self.state.dustMask = updatedMask
-                    print("📝 State updated successfully")
                 }
-                print("✅ Mask updated with flood fill")
-            } else {
-                print("❌ Flood fill failed")
             }
             
         } catch {
@@ -567,11 +587,12 @@ struct ProfessionalContentView: View {
         return NSImage(cgImage: newCGImage, size: mask.size)
     }
     
-    private func floodFillRemove(mask: NSImage, at point: CGPoint) -> NSImage? {
-        print("🌊 Starting flood fill at point: \(point)")
+    private func circularBrushErase(mask: NSImage, at point: CGPoint, pixelRadius: Int) -> NSImage? {
+        let brushRadius = pixelRadius
+        print("🖌️ Brush erase at \(point) with radius \(brushRadius)")
         
         guard let cgImage = mask.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            print("❌ Failed to get CGImage from mask")
+            print("❌ Failed to get CGImage")
             return nil
         }
         
@@ -580,20 +601,16 @@ struct ProfessionalContentView: View {
         
         // Safety check for valid dimensions
         guard width > 0 && height > 0 else {
-            print("❌ Invalid image dimensions: \(width)x\(height)")
             return mask
         }
         
         // Check if point is within bounds
-        let x = Int(point.x.rounded())
-        let y = Int(point.y.rounded())
+        let centerX = Int(point.x.rounded())
+        let centerY = Int(point.y.rounded())
         
-        guard x >= 0 && x < width && y >= 0 && y < height else {
-            print("❌ Point out of bounds: (\(x), \(y)) for image \(width)x\(height)")
+        guard centerX >= 0 && centerX < width && centerY >= 0 && centerY < height else {
             return mask
         }
-        
-        print("📐 Image size: \(width)x\(height), Click point: (\(x), \(y))")
         
         let colorSpace = CGColorSpaceCreateDeviceGray()
         let bytesPerRow = width
@@ -603,127 +620,49 @@ struct ProfessionalContentView: View {
                                     bitsPerComponent: 8, bytesPerRow: bytesPerRow,
                                     space: colorSpace,
                                     bitmapInfo: CGImageAlphaInfo.none.rawValue) else {
-            print("❌ Failed to create CGContext")
             return nil
         }
         
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
         
         guard let data = context.data else { 
-            print("❌ Failed to get context data")
             return nil 
         }
         
         let buffer = data.bindMemory(to: UInt8.self, capacity: dataSize)
         
-        // Get the value at the clicked point
-        let clickedIndex = y * width + x
-        guard clickedIndex >= 0 && clickedIndex < dataSize else {
-            print("❌ Clicked index out of bounds: \(clickedIndex) for size \(dataSize)")
-            return mask
-        }
-        
-        // Find all dust pixels in a larger area around the click point
-        let searchRadius = 3 // Larger search area (7x7)
-        var dustPixels: [(Int, Int)] = []
-        
-        print("🔍 Searching for dust in 7x7 area around (\(x), \(y))")
-        
-        // Collect all dust pixels in the search area
-        for dy in -searchRadius...searchRadius {
-            for dx in -searchRadius...searchRadius {
-                let checkX = x + dx
-                let checkY = y + dy
-                
-                if checkX >= 0 && checkX < width && checkY >= 0 && checkY < height {
-                    let checkIndex = checkY * width + checkX
-                    let pixelValue = buffer[checkIndex]
-                    
-                    // Show what we find at center and dust pixels
-                    if dx == 0 && dy == 0 {
-                        print("🎯 Center pixel (\(checkX), \(checkY)): \(pixelValue)")
-                    }
-                    
-                    if pixelValue > 128 {
-                        dustPixels.append((checkX, checkY))
-                        print("✅ Found dust pixel at (\(checkX), \(checkY)) with value: \(pixelValue)")
-                    }
-                }
-            }
-        }
-        
-        guard !dustPixels.isEmpty else {
-            print("❌ No dust pixels found in search area")
-            return mask
-        }
-        
-        print("🎯 Found \(dustPixels.count) dust pixels to flood fill from")
-        
         // Create a copy of the buffer data for modification
         guard let mutableData = NSMutableData(length: dataSize) else {
-            print("❌ Failed to create mutable data")
             return nil
         }
         
         mutableData.replaceBytes(in: NSRange(location: 0, length: dataSize), withBytes: buffer)
         let mutableBuffer = mutableData.mutableBytes.bindMemory(to: UInt8.self, capacity: dataSize)
         
-        // Debug: Mark the clicked area with a small cross pattern for visual verification
-        let debugRadius = 1
-        for dy in -debugRadius...debugRadius {
-            for dx in -debugRadius...debugRadius {
-                let debugX = x + dx
-                let debugY = y + dy
-                if debugX >= 0 && debugX < width && debugY >= 0 && debugY < height {
-                    let debugIndex = debugY * width + debugX
-                    if (dx == 0 || dy == 0) { // Cross pattern
-                        mutableBuffer[debugIndex] = 128 // Gray to show click location
+        var pixelsChanged = 0
+        let radiusSquared = brushRadius * brushRadius
+        
+        // Apply circular brush - erase all pixels within the brush radius
+        for y in max(0, centerY - brushRadius)...min(height - 1, centerY + brushRadius) {
+            for x in max(0, centerX - brushRadius)...min(width - 1, centerX + brushRadius) {
+                // Calculate distance from center
+                let dx = x - centerX
+                let dy = y - centerY
+                let distanceSquared = dx * dx + dy * dy
+                
+                // Only erase if within circular brush
+                if distanceSquared <= radiusSquared {
+                    let index = y * width + x
+                    if index >= 0 && index < dataSize && mutableBuffer[index] > 0 {
+                        mutableBuffer[index] = 0 // Set pixel to background (no dust)
+                        pixelsChanged += 1
                     }
                 }
             }
         }
         
-        // Flood fill to remove connected dust pixels starting from all found dust pixels
-        var pixelsToCheck = dustPixels
-        var visited = Set<Int>()
-        var pixelsChanged = 0
-        
-        print("🌊 Starting area-based flood fill from \(dustPixels.count) seed pixels...")
-        
-        while !pixelsToCheck.isEmpty {
-            let (currentX, currentY) = pixelsToCheck.removeFirst()
-            
-            guard currentX >= 0 && currentX < width,
-                  currentY >= 0 && currentY < height else {
-                continue
-            }
-            
-            let currentIndex = currentY * width + currentX
-            guard currentIndex >= 0 && currentIndex < dataSize,
-                  !visited.contains(currentIndex) else {
-                continue
-            }
-            
-            visited.insert(currentIndex)
-            
-            // If this pixel is dust (similar to target), remove it
-            if mutableBuffer[currentIndex] > 128 {
-                mutableBuffer[currentIndex] = 0 // Set to black (no dust)
-                pixelsChanged += 1
-                
-                // Add neighbors to check
-                pixelsToCheck.append((currentX + 1, currentY))
-                pixelsToCheck.append((currentX - 1, currentY))
-                pixelsToCheck.append((currentX, currentY + 1))
-                pixelsToCheck.append((currentX, currentY - 1))
-            }
-        }
-        
-        print("🔢 Pixels changed: \(pixelsChanged)")
-        
         // Only create new image if we actually changed something
         guard pixelsChanged > 0 else {
-            print("⚠️ No pixels were changed")
             return mask
         }
         
@@ -736,13 +675,10 @@ struct ProfessionalContentView: View {
                                      bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
                                      provider: dataProvider, decode: nil,
                                      shouldInterpolate: false, intent: .defaultIntent) else {
-            print("❌ Failed to create new CGImage")
             return nil
         }
         
-        let newImage = NSImage(cgImage: newCGImage, size: mask.size)
-        print("✅ Successfully created new mask image")
-        return newImage
+        return NSImage(cgImage: newCGImage, size: mask.size)
     }
     
     private func handleDrop(providers: [NSItemProvider]) -> Bool {

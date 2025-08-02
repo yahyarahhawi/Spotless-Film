@@ -15,20 +15,19 @@ struct ProfessionalToolbar: View {
     let onDetectDust: () -> Void
     let onRemoveDust: () -> Void
     let onExportImage: () -> Void
+    let onThresholdChanged: () -> Void
+    
+    private func toggleCompareMode() {
+        guard state.processedImage != nil || state.dustMask != nil else { return }
+        
+        let allCases = ProfessionalContentView.CompareMode.allCases
+        let currentIndex = allCases.firstIndex(of: compareMode) ?? 0
+        let nextIndex = (currentIndex + 1) % allCases.count
+        compareMode = allCases[nextIndex]
+    }
     
     var body: some View {
         HStack(spacing: 16) {
-            // Import Section
-            Button(action: onImportImage) {
-                Label("Import", systemImage: "folder.badge.plus")
-                    .labelStyle(.titleAndIcon)
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(state.isDetecting || state.isRemoving)
-            
-            Divider()
-                .frame(height: 20)
-            
             // Tools Section
             HStack(spacing: 12) {
                 // Eraser Tool
@@ -42,7 +41,26 @@ struct ProfessionalToolbar: View {
                 .buttonStyle(.bordered)
                 .background(state.eraserToolActive ? .orange.opacity(0.2) : .clear, in: RoundedRectangle(cornerRadius: 6))
                 .disabled(state.dustMask == nil)
-                .help("Click dust particles to remove them from the mask")
+                .help("Click and erase dust with circular brush")
+
+                // Brush Size Slider (visible only when eraser tool is active)
+                if state.eraserToolActive {
+                    HStack(spacing: 6) {
+                        Image(systemName: "circlebadge")
+                            .foregroundStyle(.secondary)
+                        Slider(value: Binding(
+                            get: { Double(state.brushSize) },
+                            set: { state.brushSize = Int($0) }
+                        ), in: 5...100, step: 1)
+                            .frame(width: 120)
+                            .help("Brush radius")
+                        Text("\(state.brushSize)")
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                            .frame(minWidth: 28)
+                    }
+                    .transition(.opacity.combined(with: .slide))
+                }
             }
             
             Divider()
@@ -50,79 +68,61 @@ struct ProfessionalToolbar: View {
             
             // View Controls Section
             HStack(spacing: 8) {
-                // Zoom to Fit
-                Button(action: { state.resetZoom() }) {
-                    Image(systemName: "arrow.up.left.and.down.right.magnifyingglass")
-                }
-                .buttonStyle(.bordered)
-                .disabled(state.selectedImage == nil)
-                .help("Zoom to Fit")
-                
-                // Zoom to 100%
-                Button(action: { 
-                    state.zoomScale = 1.0
-                    state.dragOffset = .zero
-                }) {
-                    Text("1:1")
-                        .font(.caption.weight(.medium))
-                        .frame(minWidth: 24)
-                }
-                .buttonStyle(.bordered)
-                .disabled(state.selectedImage == nil)
-                .help("Actual Size")
-                
-                // Compare Mode Toggle
-                Menu {
-                    ForEach(ProfessionalContentView.CompareMode.allCases, id: \.self) { mode in
-                        Button(action: { compareMode = mode }) {
-                            Label(mode.label, systemImage: mode.icon)
-                        }
-                    }
-                } label: {
+                // Compare Mode Toggle - Simple icon only
+                Button(action: { toggleCompareMode() }) {
                     Image(systemName: compareMode.icon)
                 }
                 .buttonStyle(.bordered)
                 .disabled(state.selectedImage == nil)
-                .help("Compare Mode")
+                .help(compareMode.label)
+            }
+            
+            Divider()
+                .frame(height: 20)
+            
+            // Overlay Controls Section
+            HStack(spacing: 8) {
+                // Overlay Toggle
+                Button(action: { state.hideDetections.toggle() }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: state.hideDetections ? "eye.slash" : "eye")
+                            .foregroundStyle(state.hideDetections ? Color.secondary : Color.orange)
+                        Text("Overlay")
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(state.dustMask == nil)
+                .help("Toggle Dust Overlay (M)")
+                
+                // Overlay Opacity Slider (when mask exists and overlay is visible)
+                if state.dustMask != nil && !state.hideDetections {
+                    HStack(spacing: 8) {
+                        Text("Opacity")
+                            .font(.caption)
+                            .foregroundStyle(Color.secondary)
+                        
+                        Slider(value: $state.overlayOpacity, in: 0.1...1.0, step: 0.1)
+                            .frame(width: 100)
+                            .tint(Color.red.opacity(0.7))
+                        
+                        Text(String(format: "%.0f%%", state.overlayOpacity * 100))
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(Color.secondary)
+                            .frame(minWidth: 30)
+                    }
+                }
             }
             
             Spacer()
             
-            // Status Section
-            HStack(spacing: 12) {
-                // Processing time indicator
-                if state.processingTime > 0 {
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .foregroundStyle(.secondary)
-                        Text("\(String(format: "%.2f", state.processingTime))s")
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                
-                // Dust detection status
-                if let _ = state.dustMask {
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(.orange)
-                            .frame(width: 6, height: 6)
-                        Text("Dust Detected")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                
-                // Clean status
-                if let _ = state.processedImage {
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(.green)
-                            .frame(width: 6, height: 6)
-                        Text("Clean")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+            // Processing time indicator
+            if state.processingTime > 0 {
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                        .foregroundStyle(Color.secondary)
+                    Text("\(String(format: "%.2f", state.processingTime))s")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(Color.secondary)
                 }
             }
             
@@ -142,28 +142,10 @@ struct ProfessionalToolbar: View {
                 // Inspector Toggle
                 Button(action: { showingInspector.toggle() }) {
                     Image(systemName: "sidebar.right")
-                        .foregroundStyle(showingInspector ? .blue : .primary)
+                        .foregroundStyle(showingInspector ? Color.blue : Color.primary)
                 }
                 .buttonStyle(.bordered)
                 .help("Toggle Inspector")
-                
-                // More Menu
-                Menu {
-                    Button("Preferences") {
-                        // TODO: Implement preferences
-                    }
-                    Button("About") {
-                        // TODO: Implement about
-                    }
-                    Divider()
-                    Button("Help") {
-                        // TODO: Implement help
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-                .buttonStyle(.bordered)
-                .help("More Options")
             }
         }
         .padding(.horizontal, 20)
@@ -188,6 +170,7 @@ struct ProfessionalToolbar: View {
         onImportImage: {},
         onDetectDust: {},
         onRemoveDust: {},
-        onExportImage: {}
+        onExportImage: {},
+        onThresholdChanged: {}
     )
 }
