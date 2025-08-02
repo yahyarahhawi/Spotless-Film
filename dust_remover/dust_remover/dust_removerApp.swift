@@ -11,7 +11,9 @@ import SwiftUI
 struct dust_removerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ProfessionalContentView()
         }
+        .windowStyle(.titleBar)
+        .windowToolbarStyle(.unified)
     }
 }

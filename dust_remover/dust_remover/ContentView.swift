@@ -13,29 +13,10 @@ import PhotosUI
 import VideoToolbox
 
 struct ContentView: View {
-    // MARK: - State Variables
-    @State private var selectedImage: NSImage?
-    @State private var processedImage: NSImage?
-    @State private var rawPrediction: MLMultiArray?
-    @State private var isLoading = false
+    @StateObject private var state = DustRemovalState()
     @State private var showingImagePicker = false
-    @State private var errorMessage: String?
-    @State private var showingError = false
-    @State private var threshold: Float = 0.05
-    @State private var processingTime: Double = 0
     @State private var model: MLModel?
     @State private var lamaModel: MLModel?
-    @State private var showingOriginal = false
-    @State private var zoomScale: CGFloat = 1.0
-    @State private var zoomAnchor: UnitPoint = .center
-    @State private var dragOffset: CGSize = .zero
-    
-    // Dust detection state
-    @State private var dustMask: NSImage?
-    @State private var rawPredictionMask: MLMultiArray?
-    @State private var isDetecting = false
-    @State private var isRemoving = false
-    @State private var hideDetections = false
     
     var body: some View {
         NavigationSplitView {
@@ -48,19 +29,19 @@ struct ContentView: View {
                         importSection
                     }
                     
-                    if selectedImage != nil {
+                    if state.selectedImage != nil {
                         Section("Processing") {
                             processSection
                         }
                     }
                     
-                    if rawPredictionMask != nil {
+                    if state.rawPredictionMask != nil {
                         Section("Detection Threshold") {
                             sensitivitySection
                         }
                     }
                     
-                    if processedImage != nil {
+                    if state.processedImage != nil {
                         Section("Export") {
                             exportSection
                         }
@@ -78,7 +59,7 @@ struct ContentView: View {
                 .navigationTitle("")
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
-                        if processedImage != nil {
+                        if state.processedImage != nil {
                             Button("Save", action: saveProcessedImage)
                                 .buttonStyle(.borderedProminent)
                         }
@@ -88,18 +69,18 @@ struct ContentView: View {
         .navigationSplitViewStyle(.balanced)
         .background(.windowBackground)
         .sheet(isPresented: $showingImagePicker) {
-            ImagePicker(selectedImage: $selectedImage)
+            ImagePicker(selectedImage: $state.selectedImage)
         }
-        .onChange(of: selectedImage) { _, _ in
+        .onChange(of: state.selectedImage) { _, _ in
             resetProcessing()
         }
         .onAppear {
             loadModel()
         }
-        .alert("Error", isPresented: $showingError) {
+        .alert("Error", isPresented: $state.showingError) {
             Button("OK") { }
         } message: {
-            Text(errorMessage ?? "Unknown error occurred")
+            Text(state.errorMessage ?? "Unknown error occurred")
         }
     }
     
@@ -143,14 +124,14 @@ struct ContentView: View {
             }
             .buttonStyle(.bordered)
             .controlSize(.large)
-            .disabled(isLoading)
+            .disabled(state.isDetecting || state.isRemoving)
         }
         .padding(.vertical, 8)
     }
                     
     private var processSection: some View {
         VStack(spacing: 12) {
-            if let selectedImage = selectedImage {
+            if let selectedImage = state.selectedImage {
                 HStack {
                     Label("Image Loaded", systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)
@@ -169,36 +150,36 @@ struct ContentView: View {
                 // Detect Dust Button
                 Button(action: detectDust) {
                     HStack {
-                        if isDetecting {
+                        if state.isDetecting {
                             ProgressView()
                                 .scaleEffect(0.8)
                         } else {
                             Image(systemName: "magnifyingglass")
                         }
-                        Text(isDetecting ? "Detecting..." : "Detect Dust")
+                        Text(state.isDetecting ? "Detecting..." : "Detect Dust")
                     }
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
-                .disabled(isDetecting || isRemoving)
+                .disabled(state.isDetecting || state.isRemoving)
                 
                 // Remove Dust Button
                 Button(action: removeDust) {
                     HStack {
-                        if isRemoving {
+                        if state.isRemoving {
                             ProgressView()
                                 .scaleEffect(0.8)
                         } else {
                             Image(systemName: "wand.and.stars")
                         }
-                        Text(isRemoving ? "Removing..." : "Remove Dust")
+                        Text(state.isRemoving ? "Removing..." : "Remove Dust")
                     }
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .disabled(dustMask == nil || isDetecting || isRemoving)
+                .disabled(state.dustMask == nil || state.isDetecting || state.isRemoving)
             }
         }
         .padding(.vertical, 8)
@@ -216,7 +197,7 @@ struct ContentView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text(String(format: "%.3f", threshold))
+                    Text(String(format: "%.3f", state.threshold))
                         .font(.monospaced(.callout)())
                         .foregroundStyle(.primary)
                         .fontWeight(.medium)
@@ -226,12 +207,12 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                 }
                 
-                Slider(value: $threshold, in: 0.001...0.1, step: 0.001)
-                    .onChange(of: threshold) {
+                Slider(value: $state.threshold, in: 0.001...0.1, step: 0.001)
+                    .onChange(of: state.threshold) {
                         updateDustMaskWithThreshold()
                     }
                 
-                if rawPredictionMask != nil {
+                if state.rawPredictionMask != nil {
                     Text("Adjust the slider to fine-tune dust detection")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -244,12 +225,12 @@ struct ContentView: View {
     
     private var exportSection: some View {
         VStack(spacing: 12) {
-            if processingTime > 0 {
+            if state.processingTime > 0 {
                 HStack {
                     Label("Processed in", systemImage: "clock")
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text("\(String(format: "%.2f", processingTime))s")
+                    Text("\(String(format: "%.2f", state.processingTime))s")
                         .font(.monospaced(.caption)())
                         .foregroundStyle(.green)
                 }
@@ -272,27 +253,27 @@ struct ContentView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                if hideDetections && dustMask != nil {
+                if state.hideDetections && state.dustMask != nil {
                     Label("Original Image (Hold to Hide Detections)", systemImage: "photo")
                         .foregroundStyle(.blue)
                         .font(.title3)
                         .fontWeight(.medium)
-                } else if showingOriginal && processedImage != nil {
+                } else if state.showingOriginal && state.processedImage != nil {
                     Label("Original Image (Hold to Compare)", systemImage: "photo")
                         .foregroundStyle(.blue)
                         .font(.title3)
                         .fontWeight(.medium)
-                } else if let _ = processedImage {
+                } else if let _ = state.processedImage {
                     Label("Dust-Free Result", systemImage: "sparkles.tv.fill")
                         .foregroundStyle(.orange)
                         .font(.title3)
                         .fontWeight(.medium)
-                } else if dustMask != nil {
+                } else if state.dustMask != nil {
                     Label("Dust Detection Preview", systemImage: "magnifyingglass.circle.fill")
                         .foregroundStyle(.red)
                         .font(.title3)
                         .fontWeight(.medium)
-                } else if let _ = selectedImage {
+                } else if let _ = state.selectedImage {
                     Label("Original Image", systemImage: "photo")
                         .foregroundStyle(.blue)
                         .font(.title3)
@@ -306,50 +287,50 @@ struct ContentView: View {
                 Spacer()
                 
                 // Zoom controls and instruction text
-                if selectedImage != nil || processedImage != nil {
+                if state.selectedImage != nil || state.processedImage != nil {
                     HStack(spacing: 12) {
                         // Zoom controls
                         HStack(spacing: 8) {
-                            Button(action: { zoomOut() }) {
+                            Button(action: { state.zoomOut() }) {
                                 Image(systemName: "minus.magnifyingglass")
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundStyle(.secondary)
                             }
                             .buttonStyle(.borderless)
-                            .disabled(zoomScale <= 1.0)
+                            .disabled(state.zoomScale <= 1.0)
                             
-                            Text("\(String(format: "%.0f", zoomScale * 100))%")
+                            Text("\(String(format: "%.0f", state.zoomScale * 100))%")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .frame(minWidth: 32)
                             
-                            Button(action: { zoomIn() }) {
+                            Button(action: { state.zoomIn() }) {
                                 Image(systemName: "plus.magnifyingglass")
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundStyle(.secondary)
                             }
                             .buttonStyle(.borderless)
-                            .disabled(zoomScale >= 5.0)
+                            .disabled(state.zoomScale >= 5.0)
                             
-                            Button(action: { resetZoom() }) {
+                            Button(action: { state.resetZoom() }) {
                                 Image(systemName: "arrow.up.left.and.down.right.magnifyingglass")
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundStyle(.secondary)
                             }
                             .buttonStyle(.borderless)
-                            .disabled(zoomScale == 1.0 && dragOffset == .zero)
+                            .disabled(state.zoomScale == 1.0 && state.dragOffset == .zero)
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
                         
-                        if processedImage != nil && !showingOriginal {
+                        if state.processedImage != nil && !state.showingOriginal {
                             VStack(alignment: .trailing, spacing: 2) {
                                 Text("Hold to see original")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
-                        } else if dustMask != nil && !hideDetections && processedImage == nil {
+                        } else if state.dustMask != nil && !state.hideDetections && state.processedImage == nil {
                             VStack(alignment: .trailing, spacing: 2) {
                                 Text("Hold to hide detections")
                                     .font(.caption)
@@ -370,7 +351,7 @@ struct ContentView: View {
                     Rectangle()
                         .fill(.quinary)
                     
-                    if selectedImage == nil && processedImage == nil {
+                    if state.selectedImage == nil && state.processedImage == nil {
                         // Drop zone when no image
                         VStack(spacing: 24) {
                             Image(systemName: "photo.on.rectangle.angled")
@@ -396,14 +377,14 @@ struct ContentView: View {
                     } else {
                         // Display current image with optional dust overlay
                         let imageToShow: NSImage? = {
-                            if hideDetections && dustMask != nil {
-                                return selectedImage
-                            } else if showingOriginal && selectedImage != nil {
-                                return selectedImage
-                            } else if processedImage != nil {
-                                return processedImage
+                            if state.hideDetections && state.dustMask != nil {
+                                return state.selectedImage
+                            } else if state.showingOriginal && state.selectedImage != nil {
+                                return state.selectedImage
+                            } else if state.processedImage != nil {
+                                return state.processedImage
                             } else {
-                                return selectedImage
+                                return state.selectedImage
                             }
                         }()
                         
@@ -416,7 +397,7 @@ struct ContentView: View {
                                     .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height)
                                 
                                 // Red dust overlay (only when dust is detected and not hiding detections)
-                                if let dustMask = dustMask, !hideDetections, processedImage == nil, !showingOriginal {
+                                if let dustMask = state.dustMask, !state.hideDetections, state.processedImage == nil, !state.showingOriginal {
                                     Image(nsImage: dustMask)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
@@ -426,38 +407,38 @@ struct ContentView: View {
                                         .opacity(0.6)
                                 }
                             }
-                            .scaleEffect(zoomScale, anchor: zoomAnchor)
-                            .offset(dragOffset)
+                            .scaleEffect(state.zoomScale, anchor: state.zoomAnchor)
+                            .offset(state.dragOffset)
                             .clipped()
                                 .onTapGesture(count: 2) {
                                     // Double-tap to reset zoom
                                     withAnimation(.easeInOut(duration: 0.3)) {
-                                        zoomScale = 1.0
-                                        dragOffset = .zero
-                                        zoomAnchor = .center
+                                        state.zoomScale = 1.0
+                                        state.dragOffset = .zero
+                                        state.zoomAnchor = .center
                                     }
                                 }
                                 .onLongPressGesture(minimumDuration: 0.1, maximumDistance: 50) {
                                     // Long press ended
-                                    if processedImage != nil {
-                                        showingOriginal = false
-                                    } else if dustMask != nil {
-                                        hideDetections = false
+                                    if state.processedImage != nil {
+                                        state.showingOriginal = false
+                                    } else if state.dustMask != nil {
+                                        state.hideDetections = false
                                     }
                                 } onPressingChanged: { pressing in
                                     // Handle press state changes
-                                    if pressing && processedImage != nil && selectedImage != nil {
+                                    if pressing && state.processedImage != nil && state.selectedImage != nil {
                                         // Show original while pressing (existing behavior)
-                                        showingOriginal = true
-                                        hideDetections = false
-                                    } else if pressing && dustMask != nil && processedImage == nil {
+                                        state.showingOriginal = true
+                                        state.hideDetections = false
+                                    } else if pressing && state.dustMask != nil && state.processedImage == nil {
                                         // Hide detections while pressing (new behavior)
-                                        hideDetections = true
-                                        showingOriginal = false
+                                        state.hideDetections = true
+                                        state.showingOriginal = false
                                     } else {
                                         // Release: restore normal state
-                                        showingOriginal = false
-                                        hideDetections = false
+                                        state.showingOriginal = false
+                                        state.hideDetections = false
                                     }
                                 }
                                 .simultaneousGesture(
@@ -465,14 +446,14 @@ struct ContentView: View {
                                     MagnificationGesture()
                                         .onChanged { value in
                                             let newScale = max(1.0, min(value, 5.0))
-                                            zoomScale = newScale
+                                            state.zoomScale = newScale
                                         }
                                         .onEnded { value in
                                             let finalScale = max(1.0, min(value, 5.0))
                                             withAnimation(.easeOut(duration: 0.2)) {
-                                                zoomScale = finalScale
+                                                state.zoomScale = finalScale
                                                 if finalScale == 1.0 {
-                                                    dragOffset = .zero
+                                                    state.dragOffset = .zero
                                                 }
                                             }
                                         }
@@ -481,20 +462,20 @@ struct ContentView: View {
                                     // Drag gesture for panning when zoomed
                                     DragGesture()
                                         .onChanged { value in
-                                            if zoomScale > 1.0 {
-                                                dragOffset = value.translation
+                                            if state.zoomScale > 1.0 {
+                                                state.dragOffset = value.translation
                                             }
                                         }
                                         .onEnded { value in
-                                            if zoomScale > 1.0 {
+                                            if state.zoomScale > 1.0 {
                                                 withAnimation(.easeOut(duration: 0.1)) {
-                                                    dragOffset = value.translation
+                                                    state.dragOffset = value.translation
                                                 }
                                             }
                                         }
                                 )
-                                .animation(.easeInOut(duration: 0.2), value: showingOriginal)
-                                .animation(.easeInOut(duration: 0.2), value: hideDetections)
+                                .animation(.easeInOut(duration: 0.2), value: state.showingOriginal)
+                                .animation(.easeInOut(duration: 0.2), value: state.hideDetections)
                         }
                     }
                 }
@@ -509,20 +490,19 @@ struct ContentView: View {
     // MARK: - Helper Functions
     
     private func resetProcessing() {
-        processedImage = nil
-        rawPrediction = nil
-        dustMask = nil
-        rawPredictionMask = nil
-        hideDetections = false
-        resetZoom()
+        state.processedImage = nil
+        state.dustMask = nil
+        state.rawPredictionMask = nil
+        state.hideDetections = false
+        state.resetZoom()
     }
     
     // MARK: - Action Functions
     
     private func detectDust() {
-        guard let selectedImage = selectedImage, let model = model else { return }
+        guard let selectedImage = state.selectedImage, let model = model else { return }
         
-        isDetecting = true
+        state.isDetecting = true
         
         Task {
             do {
@@ -542,30 +522,30 @@ struct ContentView: View {
                 
                 await MainActor.run {
                     // Store raw prediction for threshold tuning
-                    rawPredictionMask = output
+                    state.rawPredictionMask = output
                     
                     // Create initial dust mask with current threshold
                     updateDustMaskWithThreshold()
                     
-                    isDetecting = false
+                    state.isDetecting = false
                 }
                 
             } catch {
                 await MainActor.run {
-                    errorMessage = "Dust detection failed: \(error.localizedDescription)"
-                    showingError = true
-                    isDetecting = false
+                    state.errorMessage = "Dust detection failed: \(error.localizedDescription)"
+                    state.showingError = true
+                    state.isDetecting = false
                 }
             }
         }
     }
     
     private func removeDust() {
-        guard let selectedImage = selectedImage, 
+        guard let selectedImage = state.selectedImage, 
               let lamaModel = lamaModel,
-              let dustMask = dustMask else { return }
+              let dustMask = state.dustMask else { return }
         
-        isRemoving = true
+        state.isRemoving = true
         
         Task {
             do {
@@ -601,31 +581,32 @@ struct ContentView: View {
                 let endTime = CFAbsoluteTimeGetCurrent()
                 
                 await MainActor.run {
-                    processedImage = finalImage
-                    processingTime = endTime - startTime
-                    isRemoving = false
-                    print("⏱️ Dust removal completed in \(String(format: "%.2f", processingTime))s")
+                    state.processedImage = finalImage
+                    state.processingTime = endTime - startTime
+                    state.isRemoving = false
+                    print("⏱️ Dust removal completed in \(String(format: "%.2f", state.processingTime))s")
                 }
                 
             } catch {
                 await MainActor.run {
-                    errorMessage = "Dust removal failed: \(error.localizedDescription)"
-                    showingError = true
-                    isRemoving = false
+                    state.errorMessage = "Dust removal failed: \(error.localizedDescription)"
+                    state.showingError = true
+                    state.isRemoving = false
                 }
             }
         }
     }
     
     private func updateDustMaskWithThreshold() {
-        guard let rawPredictionMask = rawPredictionMask else { return }
+        guard let rawPredictionMask = state.rawPredictionMask,
+              let originalImage = state.selectedImage else { return }
         
-        dustMask = createBinaryMask(from: rawPredictionMask, threshold: threshold)
+        state.dustMask = createBinaryMask(from: rawPredictionMask, threshold: state.threshold, originalSize: originalImage.size)
     }
     
     // MARK: - Image Processing Helper Functions
     
-    private func createBinaryMask(from multiArray: MLMultiArray, threshold: Float) -> NSImage? {
+    private func createBinaryMask(from multiArray: MLMultiArray, threshold: Float, originalSize: CGSize) -> NSImage? {
         let shape = multiArray.shape
         guard shape.count == 4,
               let width = shape[3] as? Int,
@@ -657,7 +638,10 @@ struct ContentView: View {
             return nil
         }
         
-        return NSImage(cgImage: cgImage, size: CGSize(width: width, height: height))
+        let maskImage = NSImage(cgImage: cgImage, size: CGSize(width: width, height: height))
+        
+        // Resize the mask to match the original image dimensions
+        return maskImage.resized(to: originalSize)
     }
     
     private func dilateMask(_ mask: NSImage) -> NSImage? {
@@ -725,28 +709,6 @@ struct ContentView: View {
     
     // MARK: - Zoom Functions
     
-    private func zoomIn() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            zoomScale = min(zoomScale * 1.5, 5.0)
-        }
-    }
-    
-    private func zoomOut() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            zoomScale = max(zoomScale / 1.5, 1.0)
-            if zoomScale == 1.0 {
-                dragOffset = .zero
-            }
-        }
-    }
-    
-    private func resetZoom() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            zoomScale = 1.0
-            dragOffset = .zero
-            zoomAnchor = .center
-        }
-    }
     
     private func handleDrop(providers: [NSItemProvider]) -> Bool {
         guard let provider = providers.first else { return false }
@@ -755,11 +717,11 @@ struct ContentView: View {
             provider.loadItem(forTypeIdentifier: "public.image", options: nil) { item, error in
                 if let url = item as? URL {
                     DispatchQueue.main.async {
-                        self.selectedImage = NSImage(contentsOf: url)
+                        self.state.selectedImage = NSImage(contentsOf: url)
                     }
                 } else if let data = item as? Data {
                     DispatchQueue.main.async {
-                        self.selectedImage = NSImage(data: data)
+                        self.state.selectedImage = NSImage(data: data)
                     }
                 }
             }
@@ -820,8 +782,8 @@ struct ContentView: View {
             }
             
         } catch {
-            errorMessage = "Failed to load AI models: \(error.localizedDescription)"
-            showingError = true
+            state.errorMessage = "Failed to load AI models: \(error.localizedDescription)"
+            state.showingError = true
             print("❌ Failed to load models: \(error)")
         }
     }
@@ -1026,7 +988,7 @@ struct ContentView: View {
     }
     
     private func saveProcessedImage() {
-        guard let processedImage = processedImage else { return }
+        guard let processedImage = state.processedImage else { return }
         
         let savePanel = NSSavePanel()
         savePanel.allowedContentTypes = [.png]
@@ -1050,169 +1012,16 @@ struct ContentView: View {
                     }
                 } catch {
                     print("❌ Failed to save image: \(error)")
-                errorMessage = "Failed to save image: \(error.localizedDescription)"
-                showingError = true
+                    DispatchQueue.main.async {
+                        self.state.errorMessage = "Failed to save image: \(error.localizedDescription)"
+                        self.state.showingError = true
+                    }
             }
         }
     }
 }
 
 
-// MARK: - Supporting Types
-
-enum ProcessingError: LocalizedError {
-    case pixelBufferCreationFailed
-    case outputProcessingFailed
-    case maskConversionFailed
-    case modelLoadFailed(String)
-    
-    var errorDescription: String? {
-        switch self {
-        case .pixelBufferCreationFailed:
-            return "Failed to create pixel buffer"
-        case .outputProcessingFailed:
-            return "Failed to process model output"
-        case .maskConversionFailed:
-            return "Failed to convert mask"
-        case .modelLoadFailed(let message):
-            return "Model loading failed: \(message)"
-        }
-    }
-}
-
-// MARK: - Extensions
-
-extension NSImage {
-    func resized(to size: CGSize) -> NSImage {
-        let resizedImage = NSImage(size: size)
-        resizedImage.lockFocus()
-        
-        let sourceRect = NSRect(origin: .zero, size: self.size)
-        let targetRect = NSRect(origin: .zero, size: size)
-        
-        self.draw(in: targetRect, from: sourceRect, operation: .copy, fraction: 1.0)
-        
-        resizedImage.unlockFocus()
-        return resizedImage
-    }
-    
-    func toGrayscale() -> NSImage {
-        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return self }
-        
-        let colorSpace = CGColorSpaceCreateDeviceGray()
-        let context = CGContext(data: nil, width: Int(size.width), height: Int(size.height), 
-                               bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, 
-                               bitmapInfo: CGImageAlphaInfo.none.rawValue)
-        
-        context?.draw(cgImage, in: CGRect(origin: .zero, size: size))
-        
-        guard let outputCGImage = context?.makeImage() else { return self }
-        return NSImage(cgImage: outputCGImage, size: size)
-    }
-    
-    func toRGB() -> NSImage {
-        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return self }
-        
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let context = CGContext(data: nil, 
-                               width: Int(size.width), 
-                               height: Int(size.height), 
-                               bitsPerComponent: 8, 
-                               bytesPerRow: 0, 
-                               space: colorSpace, 
-                               bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue)
-        
-        context?.draw(cgImage, in: CGRect(origin: .zero, size: size))
-        
-        guard let outputCGImage = context?.makeImage() else { return self }
-        return NSImage(cgImage: outputCGImage, size: size)
-    }
-    
-    func toCVPixelBuffer() -> CVPixelBuffer? {
-        let attrs = [
-            kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue as Any,
-            kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue as Any,
-            kCVPixelBufferIOSurfacePropertiesKey: [:] as CFDictionary
-        ] as CFDictionary
-        
-        var pixelBuffer: CVPixelBuffer?
-        let status = CVPixelBufferCreate(kCFAllocatorDefault,
-                                       Int(size.width),
-                                       Int(size.height),
-                                       kCVPixelFormatType_OneComponent8,
-                                       attrs,
-                                       &pixelBuffer)
-        
-        guard status == kCVReturnSuccess, let buffer = pixelBuffer else {
-            return nil
-        }
-        
-        CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
-        defer { CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0)) }
-        
-        guard let context = CGContext(data: CVPixelBufferGetBaseAddress(buffer),
-                                    width: Int(size.width),
-                                    height: Int(size.height),
-                                    bitsPerComponent: 8,
-                                    bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-                                    space: CGColorSpaceCreateDeviceGray(),
-                                    bitmapInfo: CGImageAlphaInfo.none.rawValue),
-              let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            return nil
-        }
-        
-            context.draw(cgImage, in: CGRect(origin: .zero, size: size))
-        return buffer
-    }
-    
-    func toCVPixelBufferRGB() -> CVPixelBuffer? {
-        let attrs = [
-            kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue as Any,
-            kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue as Any,
-            kCVPixelBufferIOSurfacePropertiesKey: [:] as CFDictionary
-        ] as CFDictionary
-        
-        var pixelBuffer: CVPixelBuffer?
-        let status = CVPixelBufferCreate(kCFAllocatorDefault,
-                                       Int(size.width),
-                                       Int(size.height),
-                                       kCVPixelFormatType_32ARGB, // Use ARGB for LaMa input
-                                       attrs,
-                                       &pixelBuffer)
-        
-        guard status == kCVReturnSuccess, let buffer = pixelBuffer else {
-            return nil
-        }
-        
-        CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
-        defer { CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0)) }
-        
-        guard let context = CGContext(data: CVPixelBufferGetBaseAddress(buffer),
-                                    width: Int(size.width),
-                                    height: Int(size.height),
-                                     bitsPerComponent: 8,
-                                    bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-                                    space: CGColorSpaceCreateDeviceRGB(),
-                                    bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue), // ARGB
-              let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            return nil
-        }
-        
-        context.draw(cgImage, in: CGRect(origin: .zero, size: size))
-        return buffer
-    }
-    
-    convenience init?(cvPixelBuffer: CVPixelBuffer) {
-        let ciImage = CIImage(cvPixelBuffer: cvPixelBuffer)
-        let context = CIContext()
-        
-        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
-            return nil
-        }
-        
-        self.init(cgImage: cgImage, size: ciImage.extent.size)
-    }
-}
 
 // MARK: - Image Picker (macOS)
 
