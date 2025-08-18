@@ -67,3 +67,5 @@ venv.bak/
 
 *.dmg
 CLAUDE.md
+
+!docs/app-img.jpg
