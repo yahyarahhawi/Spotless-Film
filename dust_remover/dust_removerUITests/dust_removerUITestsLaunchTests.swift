@@ -1,13 +1,13 @@
 //
 //  dust_removerUITestsLaunchTests.swift
-//  dust_removerUITests
+//  Spotless Film UI Tests
 //
 //  Created by Yahya Rahhawi on 8/1/25.
 //
 
 import XCTest
 
-final class dust_removerUITestsLaunchTests: XCTestCase {
+final class SpotlessFilmUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

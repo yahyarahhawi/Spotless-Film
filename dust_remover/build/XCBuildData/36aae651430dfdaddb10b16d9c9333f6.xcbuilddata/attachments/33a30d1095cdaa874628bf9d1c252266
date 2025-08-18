@@ -1,0 +1,178 @@
+{
+  "" : {
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/Spotless-Film-master.dia",
+    "emit-module-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/Spotless-Film-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/Spotless-Film-master-emit-module.dia",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/Spotless-Film-master.swiftdeps"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ContentView.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ContentView.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ContentView.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ContentView.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ContentView.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ContentView.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ContentView~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/DustRemovalState.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/DustRemovalState.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/DustRemovalState.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/DustRemovalState.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/DustRemovalState.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/DustRemovalState.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/DustRemovalState.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/DustRemovalState.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/DustRemovalState~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ImageDisplayView.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageDisplayView.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageDisplayView.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageDisplayView.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageDisplayView.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageDisplayView.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageDisplayView.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageDisplayView.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageDisplayView~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ImageProcessingService.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageProcessingService.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageProcessingService.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageProcessingService.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageProcessingService.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageProcessingService.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageProcessingService.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageProcessingService.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ImageProcessingService~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ModelManager.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ModelManager.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ModelManager.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ModelManager.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ModelManager.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ModelManager.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ModelManager.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ModelManager.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ModelManager~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/NSImage+Extensions.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/NSImage+Extensions.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/NSImage+Extensions.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/NSImage+Extensions.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/NSImage+Extensions.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/NSImage+Extensions.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/NSImage+Extensions.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/NSImage+Extensions.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/NSImage+Extensions~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ProfessionalCanvas.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalCanvas.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalCanvas.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalCanvas.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalCanvas.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalCanvas.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalCanvas.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalCanvas.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalCanvas~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ProfessionalContentView.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalContentView.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalContentView.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalContentView.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalContentView.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalContentView.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalContentView.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalContentView.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalContentView~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ProfessionalInspector.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalInspector.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalInspector.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalInspector.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalInspector.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalInspector.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalInspector.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalInspector.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalInspector~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ProfessionalSidebar.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalSidebar.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalSidebar.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalSidebar.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalSidebar.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalSidebar.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalSidebar.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalSidebar.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalSidebar~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/ProfessionalToolbar.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalToolbar.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalToolbar.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalToolbar.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalToolbar.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalToolbar.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalToolbar.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalToolbar.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/ProfessionalToolbar~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/SidebarView.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SidebarView.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SidebarView.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SidebarView.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SidebarView.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SidebarView.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SidebarView.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SidebarView.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SidebarView~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/SimpleTestView.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SimpleTestView.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SimpleTestView.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SimpleTestView.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SimpleTestView.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SimpleTestView.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SimpleTestView.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SimpleTestView.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/SimpleTestView~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/Spotless-Film/dust_removerApp.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/dust_removerApp.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/dust_removerApp.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/dust_removerApp.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/dust_removerApp.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/dust_removerApp.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/dust_removerApp.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/dust_removerApp.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/dust_removerApp~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/DerivedSources/CoreMLGenerated/LaMa/LaMa.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/LaMa.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/LaMa.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/LaMa.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/LaMa.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/LaMa.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/LaMa.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/LaMa.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/LaMa~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/DerivedSources/CoreMLGenerated/UNetDust/UNetDust.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/UNetDust.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/UNetDust.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/UNetDust.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/UNetDust.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/UNetDust.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/UNetDust.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/UNetDust.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/UNetDust~partial.swiftmodule"
+  },
+  "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/yahyarahhawi/Developer/Dust-Removal-UNet/dust_remover/build/Spotless-Film.build/Debug/Spotless-Film.build/Objects-normal/x86_64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

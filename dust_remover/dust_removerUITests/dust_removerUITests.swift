@@ -1,13 +1,13 @@
 //
 //  dust_removerUITests.swift
-//  dust_removerUITests
+//  Spotless Film UI Tests
 //
 //  Created by Yahya Rahhawi on 8/1/25.
 //
 
 import XCTest
 
-final class dust_removerUITests: XCTestCase {
+final class SpotlessFilmUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
