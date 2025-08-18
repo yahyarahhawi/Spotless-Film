@@ -1,4 +1,0 @@
-# macOS app bundle + Core ML compiled models
-Spotless-Film.app/
-*.mlmodelc/
-*.bin
