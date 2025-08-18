@@ -2,6 +2,9 @@
 
 A complete dust removal pipeline for scanned film photographs using deep learning. The system combines **U-Net dust detection** with **LaMa deep learning inpainting** for state-of-the-art film restoration.
 
+![App Preview](docs/app-img.jpg)
+
+If you simply want to use it as a standalone app, feel free to download this simple photo editor I made for macos. 
 ## Key Features
 
 - **Synthetic Training Data Generation**: Creates realistic dust patterns without manual annotation
