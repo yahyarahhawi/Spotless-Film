@@ -315,23 +315,11 @@ class SpotlessFilmModern:
         canvas_container.grid_columnconfigure(0, weight=1)
         canvas_container.grid_rowconfigure(0, weight=1)
         
-        # Prefer OpenGL viewer when available, fallback to Canvas
-        self.use_gl = OPENGL_AVAILABLE
-        print(f"[GL] OPENGL_AVAILABLE={OPENGL_AVAILABLE}; import_error={GL_IMPORT_ERROR}")
-        if self.use_gl:
-            try:
-                print("[GL] Initializing GLImageView…")
-                self.gl_view = GLImageView(canvas_container, width=800, height=600)
-                self.gl_view.grid(row=0, column=0, sticky="nsew")
-                print("[GL] GLImageView initialized")
-            except Exception as e:
-                self.use_gl = False
-                print(f"[GL] Failed to init GLImageView, falling back to Canvas: {e}")
-        if not self.use_gl:
-            print("[GL] Using Tk canvas fallback")
-            # Create simple canvas for image display (darker background to match macOS)
-            self.canvas = ctk.CTkCanvas(canvas_container, bg="#1E1E1E", highlightthickness=0)
-            self.canvas.grid(row=0, column=0, sticky="nsew")
+        # Force reliable Tk canvas path on macOS; disable GL to avoid circular import issues
+        self.use_gl = False
+        # Create simple canvas for image display (darker background to match macOS)
+        self.canvas = ctk.CTkCanvas(canvas_container, bg="#1E1E1E", highlightthickness=0)
+        self.canvas.grid(row=0, column=0, sticky="nsew")
         
         # Bind canvas events
         if not self.use_gl:
@@ -1814,7 +1802,7 @@ class SpotlessFilmModern:
             from tkinter import filedialog
             file_path = filedialog.asksaveasfilename(
                 defaultextension=".jpg",
-                initialname=default_name,
+                initialfile=default_name,
                 filetypes=[
                     ("JPEG files", "*.jpg"),
                     ("PNG files", "*.png"),
