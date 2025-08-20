@@ -1,0 +1,46 @@
+# Spotless Film App Requirements
+# Comprehensive dependencies for the Spotless Film application
+
+# Core GUI and Windowing
+tkinter-dnd2>=0.3.0
+
+# Image Processing
+Pillow>=10.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Deep Learning
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Optional: LaMa Inpainting (advanced)
+# Requires Rust compiler for installation
+# lama-cleaner>=1.2.0
+
+# Progress and UI
+tqdm>=4.65.0
+
+# File and Path Handling
+pathlib2>=2.3.7; python_version < '3.4'
+
+# Optional: Additional image formats
+# Pillow-SIMD>=10.0.0  # SIMD-optimized version of Pillow
+
+# Development and Testing (optional)
+# pytest>=7.4.0
+# black>=23.0.0
+# flake8>=6.0.0
+
+# Platform-specific optimizations
+# For macOS (Metal Performance Shaders)
+# No additional requirements - torch includes MPS support
+
+# For CUDA support (NVIDIA GPUs)
+# torch>=2.0.0+cu118
+# torchvision>=0.15.0+cu118
+
+# Note: Install instructions:
+# 1. Basic installation: pip install -r requirements_professional.txt
+# 2. For LaMa support: pip install lama-cleaner (requires Rust)
+# 3. For CUDA: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
