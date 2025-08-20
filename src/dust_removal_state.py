@@ -43,7 +43,7 @@ class ViewState:
     split_position: float = 0.5
     overlay_opacity: float = 0.6
     tool_mode: ToolMode = ToolMode.NONE
-    brush_size: int = 15
+    brush_size: int = 10
     space_key_pressed: bool = False
 
 
@@ -52,7 +52,7 @@ class ProcessingState:
     """Processing-related state"""
     is_detecting: bool = False
     is_removing: bool = False
-    threshold: float = 0.05
+    threshold: float = 0.0255  # Middle value between 0.001 and 0.05
     processing_time: float = 0.0
     patch_size: int = 1024
     stride: int = 512

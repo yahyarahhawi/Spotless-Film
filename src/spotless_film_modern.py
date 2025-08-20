@@ -119,7 +119,7 @@ class SpotlessFilmModern:
         self.sidebar_frame = ctk.CTkFrame(self.main_frame, width=280, corner_radius=0, 
                                          fg_color="#2A2A2A")
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 1))
-        self.sidebar_frame.grid_rowconfigure(10, weight=1)  # Empty space
+        self.sidebar_frame.grid_rowconfigure(4, weight=1)  # Empty space at bottom after all sections
         self.sidebar_frame.grid_propagate(False)
         
         # Create macOS-style sidebar content
@@ -190,23 +190,25 @@ class SpotlessFilmModern:
     
     def create_import_section(self, parent):
         """Create import section content matching macOS design"""
-        # Status indicator
+        # Status indicator (always visible to prevent layout shifts)
         self.import_status_frame = ctk.CTkFrame(parent, fg_color="transparent")
         self.import_status_frame.pack(fill="x", pady=(0, 10))
         
-        self.import_status_label = ctk.CTkLabel(self.import_status_frame, text="● Image Loaded",
-                                               font=ctk.CTkFont(size=12), text_color="#4CAF50")
-        # Initially hidden - will show when image is loaded
+        self.import_status_label = ctk.CTkLabel(self.import_status_frame, text="○ No image selected",
+                                               font=ctk.CTkFont(size=12), text_color="#888888")
+        self.import_status_label.pack(anchor="w")
         
-        # Image info
+        # Image info (always visible with placeholder)
         self.image_info_frame = ctk.CTkFrame(parent, fg_color="transparent")
         self.image_info_frame.pack(fill="x", pady=(0, 10))
         
-        self.size_label = ctk.CTkLabel(self.image_info_frame, text="Size:",
+        self.size_label = ctk.CTkLabel(self.image_info_frame, text="Size: --",
                                       font=ctk.CTkFont(size=10), text_color="#888888")
+        self.size_label.pack(anchor="w")
         
-        self.colorspace_label = ctk.CTkLabel(self.image_info_frame, text="Color Space:",
+        self.colorspace_label = ctk.CTkLabel(self.image_info_frame, text="Format: --",
                                            font=ctk.CTkFont(size=10), text_color="#888888")
+        self.colorspace_label.pack(anchor="w")
         
         # Choose File button
         self.import_btn = ctk.CTkButton(parent, text="📁 Choose File",
@@ -345,6 +347,7 @@ class SpotlessFilmModern:
         # Initialize zoom/pan state (kept in central state)
         self.is_panning = False
         self.last_mouse_pos = None
+        self.last_loaded_path = None  # Track loaded file for export
         if not self.use_gl:
             self.canvas.focus_set()  # Allow canvas to receive key events
         
@@ -441,12 +444,16 @@ class SpotlessFilmModern:
         
         self.brush_size_slider = ctk.CTkSlider(self.brush_size_frame, from_=5, to=100, width=120,
                                               command=self.on_brush_size_changed)
+        self.brush_size_slider.set(10)  # Initialize to default brush size
         self.brush_size_slider.pack(side="left", padx=(8, 8))
         
-        self.brush_size_value_label = ctk.CTkLabel(self.brush_size_frame, text="20px", width=40,
+        self.brush_size_value_label = ctk.CTkLabel(self.brush_size_frame, text="10px", width=40,
                                                   font=ctk.CTkFont(size=11, family="Monaco"), 
                                                   text_color="#CCCCCC")
         self.brush_size_value_label.pack(side="left")
+        
+        # Pack brush size frame initially for testing
+        self.brush_size_frame.pack(side="left", padx=(20, 0))
         
         
         # Center view mode button (single cycling button)
@@ -459,57 +466,6 @@ class SpotlessFilmModern:
                                            font=ctk.CTkFont(size=12),
                                            fg_color="#007AFF", hover_color="#0051D0")
         self.view_cycle_btn.pack(side="left", padx=2)
-    
-    def cycle_view_mode(self):
-        """Cycle through view modes"""
-        modes = [ProcessingMode.SINGLE, ProcessingMode.SIDE_BY_SIDE, ProcessingMode.SPLIT_SLIDER]
-        current_index = modes.index(self.state.view_state.processing_mode)
-        next_mode = modes[(current_index + 1) % len(modes)]
-        self.set_view_mode(next_mode)
-        
-        # Update button text
-        mode_text = {
-            ProcessingMode.SINGLE: "🔍 Single",
-            ProcessingMode.SIDE_BY_SIDE: "🔄 Side by Side",
-            ProcessingMode.SPLIT_SLIDER: "✂️ Split View"
-        }
-        self.view_cycle_btn.configure(text=mode_text[next_mode])
-    
-    def toggle_eraser_tool(self):
-        """Toggle eraser tool"""
-        if self.state.view_state.tool_mode == ToolMode.ERASER:
-            self.state.set_tool_mode(ToolMode.NONE)
-            self.eraser_btn.configure(text="⬜\nEraser", fg_color="#5A5A5A")
-            self.brush_size_frame.pack_forget()
-        else:
-            self.state.set_tool_mode(ToolMode.ERASER)
-            self.eraser_btn.configure(text="✅\nEraser", fg_color="#FF6B35")
-            self.brush_btn.configure(text="⬛\nBrush", fg_color="#5A5A5A")
-            self.brush_size_frame.pack(side="left", padx=(20, 0))
-        
-        # Update cursor
-        self.update_cursor_for_tool_change()
-    
-    def toggle_brush_tool(self):
-        """Toggle brush tool"""
-        if self.state.view_state.tool_mode == ToolMode.BRUSH:
-            self.state.set_tool_mode(ToolMode.NONE)
-            self.brush_btn.configure(text="⬛\nBrush", fg_color="#5A5A5A")
-            self.brush_size_frame.pack_forget()
-        else:
-            self.state.set_tool_mode(ToolMode.BRUSH)
-            self.brush_btn.configure(text="✅\nBrush", fg_color="#4CAF50")
-            self.eraser_btn.configure(text="⬜\nEraser", fg_color="#5A5A5A")
-            self.brush_size_frame.pack(side="left", padx=(20, 0))
-        
-        # Update cursor
-        self.update_cursor_for_tool_change()
-    
-    def on_brush_size_changed(self, value):
-        """Handle brush size change"""
-        size = int(float(value))
-        self.state.view_state.brush_size = size
-        self.brush_size_value_label.configure(text=f"{size}px")
         
         # Right side overlay controls
         right_controls_frame = ctk.CTkFrame(toolbar_frame, fg_color="transparent")
@@ -523,6 +479,13 @@ class SpotlessFilmModern:
         self.timer_label = ctk.CTkLabel(overlay_frame, text="⏱ 2.47s",
                                        font=ctk.CTkFont(size=12), text_color="#CCCCCC")
         self.timer_label.pack(side="right", padx=(0, 20))
+        
+        # Export button
+        self.export_btn = ctk.CTkButton(overlay_frame, text="💾 Export", width=80, height=35,
+                                       command=self.export_full_resolution,
+                                       font=ctk.CTkFont(size=11),
+                                       fg_color="#28A745", hover_color="#1E7E34")
+        self.export_btn.pack(side="right", padx=(0, 10))
         
         # Overlay toggle button
         self.overlay_toggle_btn = ctk.CTkButton(overlay_frame, text="👁 Overlay", width=80, height=35,
@@ -559,8 +522,58 @@ class SpotlessFilmModern:
         self.overlay_visible = True
         self.overlay_opacity = 0.5  # 50% default
         
+        # Initialize brush size
+        self.state.view_state.brush_size = 10
+        
         # Initialize zoom UI to 100%
         self.update_zoom_ui()
+    
+    def cycle_view_mode(self):
+        """Cycle through view modes"""
+        modes = [ProcessingMode.SINGLE, ProcessingMode.SIDE_BY_SIDE, ProcessingMode.SPLIT_SLIDER]
+        current_index = modes.index(self.state.view_state.processing_mode)
+        next_mode = modes[(current_index + 1) % len(modes)]
+        self.set_view_mode(next_mode)
+        
+        # Update button text
+        mode_text = {
+            ProcessingMode.SINGLE: "🔍 Single",
+            ProcessingMode.SIDE_BY_SIDE: "🔄 Side by Side",
+            ProcessingMode.SPLIT_SLIDER: "✂️ Split View"
+        }
+        self.view_cycle_btn.configure(text=mode_text[next_mode])
+    
+    def toggle_eraser_tool(self):
+        """Toggle eraser tool"""
+        if self.state.view_state.tool_mode == ToolMode.ERASER:
+            self.state.set_tool_mode(ToolMode.NONE)
+            self.eraser_btn.configure(text="⬜\nEraser", fg_color="#5A5A5A")
+        else:
+            self.state.set_tool_mode(ToolMode.ERASER)
+            self.eraser_btn.configure(text="✅\nEraser", fg_color="#FF6B35")
+            self.brush_btn.configure(text="⬛\nBrush", fg_color="#5A5A5A")
+        
+        # Update cursor
+        self.update_cursor_for_tool_change()
+    
+    def toggle_brush_tool(self):
+        """Toggle brush tool"""
+        if self.state.view_state.tool_mode == ToolMode.BRUSH:
+            self.state.set_tool_mode(ToolMode.NONE)
+            self.brush_btn.configure(text="⬛\nBrush", fg_color="#5A5A5A")
+        else:
+            self.state.set_tool_mode(ToolMode.BRUSH)
+            self.brush_btn.configure(text="✅\nBrush", fg_color="#4CAF50")
+            self.eraser_btn.configure(text="⬜\nEraser", fg_color="#5A5A5A")
+        
+        # Update cursor
+        self.update_cursor_for_tool_change()
+    
+    def on_brush_size_changed(self, value):
+        """Handle brush size change"""
+        size = int(float(value))
+        self.state.view_state.brush_size = size
+        self.brush_size_value_label.configure(text=f"{size}px")
     
     def toggle_overlay(self):
         """Toggle dust overlay visibility"""
@@ -648,7 +661,13 @@ class SpotlessFilmModern:
     
     def on_canvas_click(self, event):
         """Handle canvas click for split view interaction"""
-        # Tool interactions first
+        # Prioritize panning when space is held (even with tools selected)
+        if self.state.view_state.space_key_pressed:
+            self.is_panning = True
+            self.last_mouse_pos = (event.x, event.y)
+            return
+
+        # Tool interactions (only when space is not pressed)
         if self.state.view_state.tool_mode == ToolMode.ERASER and self.state.dust_mask is not None:
             cw, ch = self.canvas.winfo_width(), self.canvas.winfo_height()
             self.apply_eraser_at_point((event.x, event.y), cw, ch)
@@ -656,12 +675,6 @@ class SpotlessFilmModern:
         if self.state.view_state.tool_mode == ToolMode.BRUSH and self.state.dust_mask is not None:
             cw, ch = self.canvas.winfo_width(), self.canvas.winfo_height()
             self.apply_brush_at_point((event.x, event.y), cw, ch)
-            return
-
-        # Begin panning only when space is held (even if zoomed)
-        if self.state.view_state.space_key_pressed:
-            self.is_panning = True
-            self.last_mouse_pos = (event.x, event.y)
             return
 
         if self.state.view_state.processing_mode == ProcessingMode.SPLIT_SLIDER and hasattr(self, 'photo_split'):
@@ -675,7 +688,37 @@ class SpotlessFilmModern:
     
     def on_canvas_drag(self, event):
         """Handle canvas drag for split view interaction or panning when zoomed"""
-        # Tool drags
+        # Prioritize panning when space is held (even with tools selected)
+        if self.state.view_state.space_key_pressed:
+            # Initialize panning if not already started
+            if self.last_mouse_pos is None:
+                self.last_mouse_pos = (event.x, event.y)
+                self.is_panning = True
+                print("🔧 Panning initialized")
+                return
+                
+            dx = event.x - self.last_mouse_pos[0]
+            dy = event.y - self.last_mouse_pos[1]
+            
+            # Only pan if there's actual movement
+            if abs(dx) > 0 or abs(dy) > 0:
+                off_x, off_y = self.state.view_state.drag_offset
+                self.state.view_state.drag_offset = (off_x + dx, off_y + dy)
+                self.last_mouse_pos = (event.x, event.y)
+                print(f"🔧 Panning: dx={dx}, dy={dy}, offset={self.state.view_state.drag_offset}")
+                
+                # Move existing canvas items without re-rendering
+                if self.image_item_id is not None:
+                    canvas_w = self.canvas.winfo_width() or 1
+                    canvas_h = self.canvas.winfo_height() or 1
+                    center_x = canvas_w // 2 + int(self.state.view_state.drag_offset[0])
+                    center_y = canvas_h // 2 + int(self.state.view_state.drag_offset[1])
+                    self.canvas.coords(self.image_item_id, center_x, center_y)
+                    if self.overlay_item_id is not None:
+                        self.canvas.coords(self.overlay_item_id, center_x, center_y)
+            return
+
+        # Tool drags (only when space is not pressed)
         if self.state.view_state.tool_mode == ToolMode.ERASER and self.state.dust_mask is not None:
             cw, ch = self.canvas.winfo_width(), self.canvas.winfo_height()
             self.apply_eraser_at_point((event.x, event.y), cw, ch)
@@ -683,24 +726,6 @@ class SpotlessFilmModern:
         if self.state.view_state.tool_mode == ToolMode.BRUSH and self.state.dust_mask is not None:
             cw, ch = self.canvas.winfo_width(), self.canvas.winfo_height()
             self.apply_brush_at_point((event.x, event.y), cw, ch)
-            return
-
-        # Panning when zoomed or space pressed
-        if self.is_panning and self.last_mouse_pos is not None:
-            dx = event.x - self.last_mouse_pos[0]
-            dy = event.y - self.last_mouse_pos[1]
-            off_x, off_y = self.state.view_state.drag_offset
-            self.state.view_state.drag_offset = (off_x + dx, off_y + dy)
-            self.last_mouse_pos = (event.x, event.y)
-            # Move existing canvas items without re-rendering
-            if self.image_item_id is not None:
-                canvas_w = self.canvas.winfo_width() or 1
-                canvas_h = self.canvas.winfo_height() or 1
-                center_x = canvas_w // 2 + int(self.state.view_state.drag_offset[0])
-                center_y = canvas_h // 2 + int(self.state.view_state.drag_offset[1])
-                self.canvas.coords(self.image_item_id, center_x, center_y)
-                if self.overlay_item_id is not None:
-                    self.canvas.coords(self.overlay_item_id, center_x, center_y)
             return
 
         # Otherwise, handle split slider dragging directly
@@ -1224,23 +1249,23 @@ class SpotlessFilmModern:
             else:
                 self.threshold_frame.pack_forget()
         
-        # Update import status and image info
-        if hasattr(self, 'import_status_label') and has_image:
-            self.import_status_label.pack(anchor="w")
-            # Update image info
-            if hasattr(self, 'size_label') and self.state.selected_image:
-                size = self.state.selected_image.size
-                self.size_label.configure(text=f"Size: {size[0]} x {size[1]}")
-                self.size_label.pack(anchor="w")
-            if hasattr(self, 'colorspace_label'):
-                self.colorspace_label.configure(text="Color Space: NSCalibratedRGBColorSpace")
-                self.colorspace_label.pack(anchor="w")
-        elif hasattr(self, 'import_status_label'):
-            self.import_status_label.pack_forget()
-            if hasattr(self, 'size_label'):
-                self.size_label.pack_forget()
-            if hasattr(self, 'colorspace_label'):
-                self.colorspace_label.pack_forget()
+        # Update import status and image info (keep elements visible to prevent layout shifts)
+        if hasattr(self, 'import_status_label'):
+            if has_image:
+                self.import_status_label.configure(text="● Image Loaded", text_color="#4CAF50")
+                # Update image info
+                if hasattr(self, 'size_label') and self.state.selected_image:
+                    size = self.state.selected_image.size
+                    self.size_label.configure(text=f"Size: {size[0]} x {size[1]}")
+                if hasattr(self, 'colorspace_label'):
+                    mode = getattr(self.state.selected_image, 'mode', 'RGB')
+                    self.colorspace_label.configure(text=f"Format: {mode}")
+            else:
+                self.import_status_label.configure(text="○ No image selected", text_color="#888888")
+                if hasattr(self, 'size_label'):
+                    self.size_label.configure(text="Size: --")
+                if hasattr(self, 'colorspace_label'):
+                    self.colorspace_label.configure(text="Format: --")
         
         # Update processing time
         if hasattr(self, 'processing_time_label') and hasattr(self.state.processing_state, 'processing_time'):
@@ -1373,6 +1398,8 @@ class SpotlessFilmModern:
             # Load image
             image = Image.open(file_path)
             self.state.selected_image = image
+            # Store the file path for export functionality
+            self.last_loaded_path = file_path
             # Build preview version for faster display
             self.preview_selected_image = self.build_preview_image(image)
             self.state.reset_processing()
@@ -1760,7 +1787,54 @@ class SpotlessFilmModern:
         if not pressed:
             self.is_panning = False
             self.last_mouse_pos = None
+        else:
+            # When space is pressed, prepare for potential panning
+            # Don't start panning until mouse is actually moved
+            pass
+        # Update cursor to reflect space key state
+        self.update_cursor_for_tool_change()
         self.state.notify_observers()
+    
+    def export_full_resolution(self):
+        """Export the full resolution processed image"""
+        if not self.state.processed_image:
+            messagebox.showwarning("Export Warning", "No processed image to export. Please process an image first.")
+            return
+        
+        try:
+            # Get the original filename to create export filename
+            if hasattr(self, 'last_loaded_path') and self.last_loaded_path:
+                import os
+                base_name = os.path.splitext(os.path.basename(self.last_loaded_path))[0]
+                default_name = f"{base_name}_dust_removed.jpg"
+            else:
+                default_name = "dust_removed_image.jpg"
+            
+            # Ask user for save location
+            from tkinter import filedialog
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".jpg",
+                initialname=default_name,
+                filetypes=[
+                    ("JPEG files", "*.jpg"),
+                    ("PNG files", "*.png"),
+                    ("All files", "*.*")
+                ],
+                title="Export Full Resolution Image"
+            )
+            
+            if file_path:
+                # Save the full resolution processed image
+                self.state.processed_image.save(file_path, quality=95)
+                messagebox.showinfo("Export Successful", f"Image exported successfully to:\n{file_path}")
+                print(f"✅ Full resolution image exported: {file_path}")
+            else:
+                print("Export cancelled by user")
+                
+        except Exception as e:
+            error_msg = f"Failed to export image: {str(e)}"
+            messagebox.showerror("Export Error", error_msg)
+            print(f"❌ Export error: {e}")
     
     def toggle_compare_mode(self):
         """Cycle through compare modes"""
@@ -1938,6 +2012,10 @@ class SpotlessFilmModern:
         if not self.state.dust_mask:
             return
         
+        # Don't apply eraser when space key is pressed (panning mode)
+        if self.state.view_state.space_key_pressed:
+            return
+        
         # Start brush stroke
         self.state.start_brush_stroke()
         
@@ -1973,6 +2051,10 @@ class SpotlessFilmModern:
     def apply_brush_at_point(self, point: Tuple[float, float], canvas_width: int, canvas_height: int):
         """Apply brush tool at given point"""
         if not self.state.dust_mask:
+            return
+        
+        # Don't apply brush when space key is pressed (panning mode)
+        if self.state.view_state.space_key_pressed:
             return
         
         # Start brush stroke
@@ -2057,19 +2139,25 @@ class SpotlessFilmModern:
     
     def update_brush_cursor(self, x, y):
         """Update brush cursor position and size"""
-        if self.use_gl:
-            return  # Skip for OpenGL view
+        if self.use_gl or not hasattr(self, 'canvas'):
+            return  # Skip for OpenGL view or if canvas not ready
             
         # Hide old cursor
         if self.brush_cursor_id:
-            self.canvas.delete(self.brush_cursor_id)
+            try:
+                self.canvas.delete(self.brush_cursor_id)
+            except:
+                pass
         
         # Get brush size (actual pixel size regardless of zoom)
         brush_size = getattr(self.state.view_state, 'brush_size', 20)
         
-        # Calculate display size (brush size on screen, accounting for current zoom)
+        # Scale brush size by current zoom level to show actual size on image
         zoom_scale = getattr(self.state.view_state, 'zoom_scale', 1.0)
-        display_size = brush_size * zoom_scale
+        display_size = int(brush_size * zoom_scale)
+        
+        # Ensure minimum visibility (at least 4 pixels) and maximum reasonable size (200 pixels)
+        display_size = max(4, min(200, display_size))
         
         # Create cursor circle
         x1 = x - display_size // 2
@@ -2077,38 +2165,66 @@ class SpotlessFilmModern:
         x2 = x + display_size // 2
         y2 = y + display_size // 2
         
-        # Different colors for brush vs eraser
+        # Red colors for both brush and eraser (Tkinter compatible colors)
         if self.state.view_state.tool_mode == ToolMode.BRUSH:
-            outline_color = "#4CAF50"  # Green
-            fill_color = "#4CAF5040"  # Semi-transparent green
+            outline_color = "#DC143C"  # Crimson red
+            fill_color = "#FFB6C1"  # Light pink (low opacity effect)
         else:  # ERASER
-            outline_color = "#FF6B35"  # Orange
-            fill_color = "#FF6B3540"  # Semi-transparent orange
+            outline_color = "#B22222"  # Fire brick red
+            fill_color = "#FFA0A0"  # Light red (low opacity effect)
         
-        self.brush_cursor_id = self.canvas.create_oval(
-            x1, y1, x2, y2,
-            outline=outline_color, 
-            fill=fill_color,
-            width=2
-        )
-        self.cursor_visible = True
+        try:
+            self.brush_cursor_id = self.canvas.create_oval(
+                x1, y1, x2, y2,
+                outline=outline_color, 
+                fill=fill_color,
+                width=2,
+                dash=(5, 3),  # Dashed line for better visibility
+                tags="brush_cursor"  # Add tag for easier management
+            )
+            self.cursor_visible = True
+            print(f"Brush cursor created: {self.state.view_state.tool_mode}, size: {display_size}")
+        except Exception as e:
+            print(f"Error creating brush cursor: {e}")
     
     def hide_brush_cursor(self):
         """Hide the brush cursor"""
-        if not self.use_gl and self.brush_cursor_id and self.cursor_visible:
-            self.canvas.delete(self.brush_cursor_id)
+        if not self.use_gl and hasattr(self, 'canvas'):
+            try:
+                # Delete by tag to ensure all cursor elements are removed
+                self.canvas.delete("brush_cursor")
+                if self.brush_cursor_id:
+                    self.canvas.delete(self.brush_cursor_id)
+            except:
+                pass
             self.brush_cursor_id = None
             self.cursor_visible = False
     
     def update_cursor_for_tool_change(self):
         """Update cursor when tool mode changes"""
-        if not self.use_gl:
-            if hasattr(self.state, 'view_state') and self.state.view_state.tool_mode in (ToolMode.BRUSH, ToolMode.ERASER):
-                # Set custom cursor for tools
-                self.canvas.config(cursor="none")  # Hide default cursor
+        if not self.use_gl and hasattr(self, 'canvas'):
+            # Check if space is pressed - always prioritize panning cursor
+            if hasattr(self.state, 'view_state') and self.state.view_state.space_key_pressed:
+                try:
+                    self.canvas.config(cursor="fleur")  # Panning cursor (4-way arrow)
+                    print("Space pressed: panning cursor active")
+                except:
+                    pass
+                self.hide_brush_cursor()
+            elif hasattr(self.state, 'view_state') and self.state.view_state.tool_mode in (ToolMode.BRUSH, ToolMode.ERASER):
+                # Set custom cursor for tools (only when space is not pressed)
+                try:
+                    self.canvas.config(cursor="none")  # Hide default cursor
+                    print(f"Tool activated: {self.state.view_state.tool_mode}, cursor hidden")
+                except:
+                    pass
             else:
                 # Reset to default cursor
-                self.canvas.config(cursor="")
+                try:
+                    self.canvas.config(cursor="")
+                    print("Tool deactivated, cursor restored")
+                except:
+                    pass
                 self.hide_brush_cursor()
 
     # MARK: - Application Lifecycle
