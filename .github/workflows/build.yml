@@ -1,14 +1,11 @@
-name: Build SpotlessFilm Executables
+name: (Disabled) Build SpotlessFilm Executables
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:  # Manual only; jobs are disabled below with if: false
 
 jobs:
   build:
+    if: ${{ false }}  # Entire job disabled
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
@@ -16,10 +13,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
         
@@ -49,20 +46,21 @@ jobs:
         pyinstaller --clean --onefile --windowed --name SpotlessFilm spotless_film_modern.py
         
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: SpotlessFilm-${{ matrix.os }}
         path: |
           src/dist/SpotlessFilm*
           
   release:
+    if: ${{ false }}  # Entire job disabled
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'  # superseded by the disabled guard above
     
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       
     - name: Create Release
       uses: softprops/action-gh-release@v1
