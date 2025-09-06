@@ -4,7 +4,7 @@ A complete dust removal pipeline for scanned film photographs using deep learnin
 
 ![App Preview](docs/app-img.jpg)
 
-[![Download for macOS](https://img.shields.io/badge/Download-macOS-blue?logo=apple&style=for-the-badge)](https://github.com/yahyarahhawi/Dust_Removal_UNET/releases/download/v1.0.0/Spotless-Film.dmg)
+[![Download for macOS](https://img.shields.io/badge/Download-macOS-blue?logo=apple&style=for-the-badge)](https://github.com/yahyarahhawi/Spotless-Film/releases/download/v1.0.1/Spotless-Film.dmg)
 
 
 If you simply want to use it as a standalone app, feel free to download this simple photo editor I made for macos. 
