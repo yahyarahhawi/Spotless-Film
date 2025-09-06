@@ -14,10 +14,8 @@ If you simply want to use it as a standalone app, feel free to download this sim
 ## Release note: v1.0.1:
 
 1. Added batch image processing for handling multiple images simultaneously.
-Bug Fixes
 
 2. Resolved an issue where dust removal caused resolution loss; images now retain full sharpness.
-Performance Improvements:
 
 3. Optimized processing pipeline for improved speed and efficiency with large image sets.
 
