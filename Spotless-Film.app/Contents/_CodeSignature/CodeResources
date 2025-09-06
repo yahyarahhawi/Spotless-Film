@@ -18,11 +18,11 @@
 		</data>
 		<key>Resources/LaMa.mlmodelc/coremldata.bin</key>
 		<data>
-		UUNHLWucrbUmnkNEvr4/ntYxNrw=
+		mkZb0PYbUX1xsAY+6Z/4QlabqmA=
 		</data>
 		<key>Resources/LaMa.mlmodelc/metadata.json</key>
 		<data>
-		lQ8WnBh0Wy8Xf8E9c2R/Do+iM7Q=
+		p33Sls1byxZYAfclggewT8KAW0Y=
 		</data>
 		<key>Resources/LaMa.mlmodelc/model.mil</key>
 		<data>
@@ -42,7 +42,7 @@
 		</data>
 		<key>Resources/UNetDust.mlmodelc/metadata.json</key>
 		<data>
-		sf1wDPQ7o1Zn2gsoN5PrWa1RGyY=
+		AUIQYGRusmA+/RfVp7eXqB6m3aE=
 		</data>
 		<key>Resources/UNetDust.mlmodelc/model.mil</key>
 		<data>
@@ -51,6 +51,10 @@
 		<key>Resources/UNetDust.mlmodelc/weights/weight.bin</key>
 		<data>
 		m2ni9lAqPlHo/c4F+mFsMcwlUZA=
+		</data>
+		<key>Resources/default.metallib</key>
+		<data>
+		hgaD5sz2t9Z7eum3TlR+VCO2J+8=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -80,14 +84,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			PFkWTkumdGaLmpPyhIF7CMm3I489h0bz8ZciA3DPvn0=
+			fCY+C+CFJ1/+9KzwwzAHp7JFl4PVpFR9e7fZ97y5di8=
 			</data>
 		</dict>
 		<key>Resources/LaMa.mlmodelc/metadata.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			mOLTbZopW4eqBlh5Yyi7kduIu4Suh/lOm59RRs43wtY=
+			7PcaShX7VMWLycgdEIZJ208a7vpbrsoFQY8deB3ZRv0=
 			</data>
 		</dict>
 		<key>Resources/LaMa.mlmodelc/model.mil</key>
@@ -122,7 +126,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			oEtdCfVplWJc6iVI1sYbVAs8xeakyctN2rq0HPTsuWE=
+			woLY4Qg0kOi2zvy/ru0XH4lbMOmeU3J09na4MD7kXcY=
 			</data>
 		</dict>
 		<key>Resources/UNetDust.mlmodelc/model.mil</key>
@@ -137,6 +141,13 @@
 			<key>hash2</key>
 			<data>
 			5ghHeS1JFe8coWKxYuy4608wP16YZv3AQhcWPYKVCVU=
+			</data>
+		</dict>
+		<key>Resources/default.metallib</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			V5BK+CSA7yB6izNvwxt29FI9olnFkEPju6fpkK2StNI=
 			</data>
 		</dict>
 	</dict>
