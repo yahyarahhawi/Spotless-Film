@@ -4,20 +4,26 @@ A complete dust removal pipeline for scanned film photographs using deep learnin
 
 ![App Preview](docs/app-img.jpg)
 
-[![Download for macOS](https://img.shields.io/badge/Download-macOS-blue?logo=apple&style=for-the-badge)](https://github.com/yahyarahhawi/Spotless-Film/releases/download/v1.0.1/Spotless-Film.dmg)
+[![Download for macOS](https://img.shields.io/badge/Download-macOS-blue?logo=apple&style=for-the-badge)](https://github.com/yahyarahhawi/Spotless-Film/releases/download/v1.1/Spotless-Film.dmg)
 
 
 If you simply want to use it as a standalone app, feel free to download this simple photo editor I made for macos. 
 
 ![App Preview](docs/app-preview.png)
 
-## Release note: v1.0.1:
+## Release note: v1.1:
 
-1. Added batch image processing for handling multiple images simultaneously.
+**New Features:**
 
-2. Resolved an issue where dust removal caused resolution loss; images now retain full sharpness.
+- Support for AdobeRGB import and export
+- Support for 16-bit color depth
+- Replaced PNG export with TIFF and JPEG
 
-3. Optimized processing pipeline for improved speed and efficiency with large image sets.
+**Bug Fixes**
+- Fixed bugs related to blurry mask when changing dust detection sensitivity
+
+**Performance Improvements:**
+- Performance boost and better utilization of GPU acceleration
 
 
 ## Key Features

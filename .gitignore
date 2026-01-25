@@ -3,7 +3,7 @@ Spotless-Film.app/
 *.mlmodelc/
 dust_remover/
 spotless-film-app/
-
+build-dmg/
 # Model files
 *.pth
 *.pt
