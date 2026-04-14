@@ -1,6 +1,28 @@
 # Spotless Film: Dust Removal for Scanned Film Photographs
 
+## Announcement
+
+I’ve been working on **Amber Film**, a standalone app for end-to-end film negative conversion.
+
+It features:
+- Auto-cropping for scans
+- A significantly improved dust detection model
+- Color print profiles
+- A much faster workflow
+
+And more.
+
+Here’s a sneak peek:
+
+![Amber Film preview](examples/Amber-Film-SneakPeek.jpg)
+
+Want to know when it launches? Fill out this form to get an email when it’s out, and feel free to leave any feature requests:
+
+https://forms.gle/weJ3GKrQo3b7kVU57
+
+---
 A complete dust removal pipeline for scanned film photographs using deep learning. The system combines **U-Net dust detection** with **LaMa deep learning inpainting** for state-of-the-art film restoration.
+
 
 ![App Preview](docs/app-img.jpg)
 
