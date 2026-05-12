@@ -2,21 +2,22 @@
 
 ## Announcement
 
-I’ve been working on **Amber Film**, a standalone app for end-to-end film negative conversion.
+I’ve been working on EmberFilm, a standalone professional app for end-to-end film negative conversion.
 
-It features:
-- Auto-cropping for scans
-- A significantly improved dust detection model
-- Color print profiles
-- A much faster workflow
+* GPU-accelerated negative conversion
+* Advanced AI dust detection and removal
+* Auto-cropping for scans
+* Intelligent color rendering and print profiles
+* Real-time non-destructive editing
+* Fast workflow designed to preserve the character and grain of film
 
-And more.
+And much more still in development.
 
 Here’s a sneak peek:
 
-![Amber Film preview](examples/Amber-Film-SneakPeek.jpg)
+![EmberFilm preview](examples/EmberFilm-SneakPeek.png)
 
-Want to know when it launches? Fill out this form to get an email when it’s out, and feel free to leave any feature requests:
+Want to try the beta version? or know when it's launched? Fill out this form to be put on the waitlist, and feel free to leave any feature requests:
 
 https://forms.gle/weJ3GKrQo3b7kVU57
 
