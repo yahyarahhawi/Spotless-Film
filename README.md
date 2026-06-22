@@ -122,4 +122,4 @@ U-Net Architecture with Synthetic Training Data Generation
 
 ## License
 
-MIT License - see LICENSE file for details.
+All Rights Reserved - see LICENSE file for details.
